@@ -1,0 +1,34 @@
+# Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment directories
+Lib/
+Include/
+Scripts/
+*.egg-info/
+
+# Flask specific files
+instance/
+*.db
+*.sqlite3
+
+# Configuration files
+*.env
+*.ini
+*.config
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
