@@ -12,16 +12,21 @@ def create_user_service(user_data: dict) -> Tuple[Response, int]:
     Creates a new user with the provided details.
 
     This function performs the following tasks:
-    - Extracts user data from the JSON request body.
+    - Extracts user data from the input dictionary.
     - Validates the presence of required fields (`username`, `email`, and `password`).
     - Checks for the existence of a user with the same email or username in the database.
     - Generates unique public and private IDs for the new user.
+    - Creates instances to store the generated IDs.
     - Creates a new user instance with the hashed password and associates it with the generated IDs.
     - Adds the new user and ID records to the database.
+    - Adds default accessories to the user's owned accessories and sets them as active.
     - Commits the transaction if successful, otherwise rolls back in case of an error.
 
     If successful, returns a JSON response with a success message and the details of the created user.
     If unsuccessful, returns a JSON response with an error message and an appropriate status code.
+
+    Args:
+        user_data (dict): A dictionary containing the user details (`username`, `email`, `password`).
 
     Returns:
         Tuple[Response, int]: 

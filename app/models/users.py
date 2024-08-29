@@ -88,7 +88,7 @@ class Users(db.Model):
     # Define relationship to UserStats model
     stats = db.relationship("UserStats", uselist=False, back_populates="user", cascade="all, delete-orphan")
     active_profile_accessories = db.relationship(
-        "UserProfileAccessories", back_populates="user", uselist=False
+        "UserProfileAccessories", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     def __repr__(self):
