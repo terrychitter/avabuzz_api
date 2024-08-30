@@ -80,7 +80,7 @@ class Users(db.Model):
     country = db.Column(db.String(255), nullable=True, default="None")
     orientation = db.Column(db.String(20), nullable=True, default="None")
     biography = db.Column(db.Text, nullable=True)
-    user_type = db.Column(db.Enum(UserType), nullable=False, default="user")
+    user_type = db.Column(db.Enum(UserType), nullable=False, default=UserType.user)
     birthdate = db.Column(db.Date, nullable=True, default=None)
     created_at = db.Column(db.DateTime, nullable=False, default=func.now())
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -96,6 +96,15 @@ class Users(db.Model):
 
     # Define relationship to UserGroups model
     groups = db.relationship("UserGroups", back_populates="owner")
+
+    # Define relationship to UserFollowers model
+    followers = db.relationship(
+        "UserFollowers", foreign_keys="[UserFollowers.follower_user_id]", back_populates="followee", cascade="all, delete-orphan", uselist=True
+    )
+
+    following = db.relationship(
+        "UserFollowers", foreign_keys="[UserFollowers.followee_user_id]", back_populates="follower", cascade="all, delete-orphan", uselist=True
+    )
 
     def __repr__(self):
         return f"<User {self.private_user_id}>"

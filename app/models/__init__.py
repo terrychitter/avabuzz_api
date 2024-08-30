@@ -1,4 +1,5 @@
-from app.models.users import Users
+from app.models.users import Users, UserStats, UserProfileAccessories
+from app.models.user_followers import UserFollowers
 from app.models.user_groups import UserGroups
 from app.models.hashtags import HashTags
 from app.models.posts import Posts, PostCategories, PostHashTags

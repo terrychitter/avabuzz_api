@@ -4,6 +4,8 @@ from app.services.users.create_user import create_user
 from app.services.users.get_users import get_users
 from app.services.users.delete_user import delete_user
 from app.services.users.update_user import update_user
+from app.services.users.follow_user import follow_user
+from app.services.users.unfollow_user import unfollow_user
 
 
 # ----------------- CREATE USER ----------------- #
@@ -96,6 +98,7 @@ def update_user_service(public_user_id: str, user_data: dict) -> Tuple[Response,
 
 # ----------------- DELETE USER ----------------- #
 def delete_user_service(public_user_id: str) -> Tuple[Response, int]:
+
     """
     Deletes a user from the database based on the user ID.
 
@@ -108,3 +111,39 @@ def delete_user_service(public_user_id: str) -> Tuple[Response, int]:
             - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
     return delete_user(public_user_id)
+
+# ----------------- FOLLOW USER ----------------- #
+def follow_user_service(follower_private_user_id: str, followee_private_user_id: str) -> Tuple[Response, int]:
+    """
+    Follow a user
+
+    Args:
+        follower_private_user_id (str): The private_user_id of the user following the other user
+        followee_private_user_id (str): The private_user_id of the user being followed
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the response and the status code
+            - 200 OK: If the user is successfully followed
+            - 400 Bad Request: If the follower is already following the followee or if the follower is trying to follow themselves
+            - 404 Not Found: If the follower or followee is not found
+            - 500 Internal Server Error: If an unexpected error occurs while following the user
+    """
+    return follow_user(follower_private_user_id, followee_private_user_id)
+
+# ----------------- UNFOLLOW USER ----------------- #
+def unfollow_user_service(unfollower_private_user_id: str, unfollowee_private_user_id: str) -> Tuple[Response, int]:
+    """
+    Unfollow a user
+
+    Args:
+        unfollower_private_user_id (str): The private_user_id of the user unfollowing the other user
+        followee_private_user_id (str): The private_user_id of the user being unfollowed
+    
+    Returns:
+        Tuple[Response, int]: A tuple containing the response and the status code
+            - 200 OK: If the user is successfully unfollowed
+            - 400 Bad Request: If the unfollower is not following the unfollowee or if the unfollower is trying to unfollow themselves
+            - 404 Not Found: If the unfollower or unfollowee is not found
+            - 500 Internal Server Error: If an unexpected error occurs while unfollowing the user
+    """
+    return unfollow_user(unfollower_private_user_id, unfollowee_private_user_id)

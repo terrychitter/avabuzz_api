@@ -14,7 +14,7 @@ def get_posts_for_user(private_user_id) -> Tuple[Response, int]:
     Returns:
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
             - If posts are successfully retrieved, returns a JSON response with the post details and a 200 status code.
-            - If an error occurs during retrieval, returns a JSON response with an error message and a 500 status code.
+            - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
     # Check if the user exists in the database
     user = Users.query.filter_by(private_user_id=private_user_id).first()

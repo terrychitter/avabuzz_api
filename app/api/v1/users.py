@@ -1,7 +1,14 @@
 from app import db
 from flask import Blueprint, request
 from app.services.auth import api_key_required
-from app.services.users import create_user_service, get_users_service, delete_user_service, update_user_service
+from app.services.users import (
+    create_user_service,
+    get_users_service,
+    delete_user_service,
+    update_user_service,
+    follow_user_service,
+    unfollow_user_service
+    )
 
 bp = Blueprint("users", __name__)
 
@@ -41,3 +48,19 @@ def update_user(public_user_id):
 @api_key_required
 def delete_user(public_user_id):
     return delete_user_service(public_user_id)
+
+# ----------------- FOLLOW USER ----------------- #
+@bp.route("/users/<string:followee_private_user_id>/follow", methods=["POST"])
+@api_key_required
+def follow_user(followee_private_user_id):
+    # Extract the followers private_user_id from the request body
+    follower_private_user_id = request.get_json().get("private_user_id")
+    return follow_user_service(follower_private_user_id, followee_private_user_id)
+
+# ----------------- UNFOLLOW USER ----------------- #
+@bp.route("/users/<string:unfollowee_private_user_id>/unfollow", methods=["POST"])
+@api_key_required
+def unfollow_user(unfollowee_private_user_id):
+    # Extract the followers private_user_id from the request body
+    unfollower_private_user_id = request.get_json().get("private_user_id")
+    return unfollow_user_service(unfollower_private_user_id, unfollowee_private_user_id)

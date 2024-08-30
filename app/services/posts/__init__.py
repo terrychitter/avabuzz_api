@@ -94,14 +94,14 @@ def delete_post_service(post_id: int) -> Tuple[Response, int]:
 # ----------------- GET POSTS BY USER ----------------- #
 def get_posts_for_user_service(private_user_id: int) -> Tuple[Response, int]:
     """
-    Fetches all posts associated with a specific user from the database.
+    Fetches posts from the database for a specific user.
 
     Args:
         private_user_id (int): The ID of the user to retrieve posts for.
 
     Returns:
-        Tuple[Response, int]: 
-            - Response: JSON response containing a list of posts associated with the specified user. 
-            - int: HTTP status code (200 for successful retrieval, 404 if no user is not found).
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If posts are successfully retrieved, returns a JSON response with the post details and a 200 status code.
+            - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
     return get_posts_for_user(private_user_id)
