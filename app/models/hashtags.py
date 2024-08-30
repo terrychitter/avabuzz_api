@@ -8,6 +8,9 @@ class HashTags(db.Model):
     views = db.Column(db.Integer, default=0)
     post_count = db.Column(db.Integer, default=0)
 
+    # Define the relationship between the HashTags and Posts models
+    posts = db.relationship("Posts", secondary="post_hashtags", back_populates="hashtags")
+
     def __repr__(self):
         return f"<HashTag {self.hashtag_id}>"
     

@@ -123,6 +123,9 @@ class Posts(db.Model):
     # Define relationship to PostHashTags model with cascade
     post_hashtags = db.relationship("PostHashTags", backref="post", cascade="all, delete-orphan")
 
+    # Define relationship to Hashtags model
+    hashtags = db.relationship("HashTags", secondary="post_hashtags", back_populates="posts")
+
     # Define relationship to PostMedia model
     media = db.relationship("PostMedia", back_populates="post", cascade="all, delete-orphan")
 
