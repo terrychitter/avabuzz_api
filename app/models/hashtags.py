@@ -11,10 +11,15 @@ class HashTags(db.Model):
     def __repr__(self):
         return f"<HashTag {self.hashtag_id}>"
     
-    def as_dict(self):
-        return {
-            "id": self.hashtag_id,
-            "name": self.hashtag_name,
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "hashtag_id": self.hashtag_id,
+            "hashtag_name": self.hashtag_name,
             "views": self.views,
             "post_count": self.post_count
         }
+    
+        for field in exclude_fields:
+            data.pop(field, None)
+    
+        return data

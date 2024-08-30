@@ -64,14 +64,49 @@ class PostMedia(db.Model):
             "size_bytes": self.media_size_bytes,
         }
 
-class PostType(Enum):
-    post = "post"
-    image = "image"
-    video = "video"
-    event= "event"
+class PostReactionTypes(db.Model):
+    __tablename__ = "post_reaction_types"
+
+    post_reaction_type = db.Column(db.String(20), primary_key=True)
+
+    def __repr__(self):
+        return f"<PostReactionType {self.post_reaction_type}>"
+    
+    def to_dict(self):
+        return {
+            "type": self.post_reaction_type
+        }
+
+class PostReactionCounts(db.Model):
+    __tablename__ = "post_reaction_counts"
+
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), primary_key=True)
+    post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+    reaction_count = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<PostReactionCount {self.post_id}-{self.post_reaction_type}>"
+    
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "post_id": self.post_id,
+            "reaction_type": self.post_reaction_type,
+            "reaction_count": self.reaction_count
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
 
 class Posts(db.Model):
     __tablename__ = "posts"
+
+    class PostType(Enum):
+        post = "post"
+        image = "image"
+        video = "video"
+        event= "event"
 
     post_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     post_caption = db.Column(db.Text, nullable=True)
@@ -97,6 +132,9 @@ class Posts(db.Model):
     # Define relationship to UserGroups model
     group = db.relationship("UserGroups", back_populates="posts")
 
+    # Define relationship to PostReactionCounts model
+    reactions = db.relationship("PostReactionCounts", backref="post", cascade="all, delete-orphan")
+
     def __repr__(self):
         return f"<Post {self.post_id}>"
     
@@ -109,8 +147,9 @@ class Posts(db.Model):
             "view_count": self.view_count,
             "user": self.user.as_dict(),
             "created_at": self.created_at,
-            "hashtags": [tag.hashtag.as_dict() for tag in self.post_hashtags],
-            "media": [media.as_dict() for media in self.media]
+            "hashtags": [tag.hashtag.as_dict()["hashtag_name"] for tag in self.post_hashtags],
+            "media": [media.as_dict() for media in self.media],
+            "reactions": [reaction.as_dict(exclude_fields=["post_id"]) for reaction in self.reactions]
         }
 
 
