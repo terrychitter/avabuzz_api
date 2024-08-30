@@ -1,7 +1,5 @@
 from app import db
-from datetime import datetime
-from app.models.users import Users
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from app.services.auth import api_key_required
 from app.services.users import create_user_service, get_users_service, delete_user_service, update_user_service
 

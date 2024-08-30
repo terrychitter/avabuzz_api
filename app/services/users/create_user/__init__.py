@@ -2,7 +2,7 @@ import datetime
 from typing import Tuple, List
 from app import db
 from flask import Response, jsonify, request
-from app.models.users import Users
+from app.models.users import Users, UserStats
 from app.models.user_public_ids import UserPublicId
 from app.models.user_private_ids import UserPrivateId
 from app.models.profile_accessories import ProfileAccessories
@@ -130,9 +130,13 @@ def create_user(user_data: dict) -> Tuple[Response, int]:
         password_hash=generate_password_hash(user_data["password"]),
     )
 
+    # Add user stats
+    user_stats = UserStats(user_id=private_id, follower_count=0, following_count=0, post_count=0)
+
     try:
         # Add the new user and ID records to the database and commit the transaction
         db.session.add(new_user)
+        db.session.add(user_stats)
         db.session.add(user_public_id)
         db.session.add(user_private_id)
         db.session.commit()

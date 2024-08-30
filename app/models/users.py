@@ -91,6 +91,12 @@ class Users(db.Model):
         "UserProfileAccessories", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
+    # Define relationship to Posts model
+    posts = db.relationship("Posts", back_populates="user", cascade="all, delete-orphan")
+
+    # Define relationship to UserGroups model
+    groups = db.relationship("UserGroups", back_populates="owner")
+
     def __repr__(self):
         return f"<User {self.private_user_id}>"
 
