@@ -3,6 +3,7 @@ from flask import Response
 from app.services.posts.get_posts import get_posts
 from app.services.posts.create_post import create_post
 from app.services.posts.delete_post import delete_post
+from app.services.posts.get_posts_for_user import get_posts_for_user
 
 # ----------------- GET POSTS ----------------- #
 def get_posts_service(post_id: Optional[int] = None) -> Tuple[Response, int]:
@@ -89,3 +90,18 @@ def delete_post_service(post_id: int) -> Tuple[Response, int]:
             - If an error occurs during deletion, returns a JSON response with an error message and a 500 status code.
     """
     return delete_post(post_id)
+
+# ----------------- GET POSTS BY USER ----------------- #
+def get_posts_for_user_service(private_user_id: int) -> Tuple[Response, int]:
+    """
+    Fetches all posts associated with a specific user from the database.
+
+    Args:
+        private_user_id (int): The ID of the user to retrieve posts for.
+
+    Returns:
+        Tuple[Response, int]: 
+            - Response: JSON response containing a list of posts associated with the specified user. 
+            - int: HTTP status code (200 for successful retrieval, 404 if no user is not found).
+    """
+    return get_posts_for_user(private_user_id)

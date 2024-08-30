@@ -100,15 +100,20 @@ class Posts(db.Model):
     def __repr__(self):
         return f"<Post {self.post_id}>"
     
-    def to_dict(self):
-        return {
+    def to_dict(self, exclude_fields: list =[]):
+        data = {
             "id": self.post_id,
             "caption": self.post_caption,
             "type": self.post_type.value,
             "category": self.post_category.as_dict(),
-            "user": self.user.as_dict(),
             "view_count": self.view_count,
+            "user": self.user.as_dict(),
             "created_at": self.created_at,
             "hashtags": [tag.hashtag.as_dict() for tag in self.post_hashtags],
             "media": [media.as_dict() for media in self.media]
         }
+
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        return data

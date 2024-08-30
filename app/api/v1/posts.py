@@ -1,7 +1,7 @@
 from app import db
 from flask import Blueprint, request
 from app.services.auth import api_key_required
-from app.services.posts import get_posts_service, create_post_service, delete_post_service
+from app.services.posts import get_posts_service, create_post_service, delete_post_service, get_posts_for_user_service
 
 bp = Blueprint("posts", __name__)
 
@@ -31,3 +31,9 @@ def create_post():
 @api_key_required
 def delete_post(post_id):
     return delete_post_service(post_id)
+
+# ----------------- GET POSTS BY PRIVATE_USER_ID ----------------- #
+@bp.route("/posts/users/<string:private_user_id>", methods=["GET"])
+@api_key_required
+def get_posts_by_user(private_user_id):
+    return get_posts_for_user_service(private_user_id=private_user_id)
