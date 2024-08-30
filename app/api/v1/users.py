@@ -6,6 +6,8 @@ from app.services.users import (
     get_users_service,
     delete_user_service,
     update_user_service,
+    get_user_followers_service,
+    get_user_following_service,
     follow_user_service,
     unfollow_user_service
     )
@@ -48,6 +50,18 @@ def update_user(public_user_id):
 @api_key_required
 def delete_user(public_user_id):
     return delete_user_service(public_user_id)
+
+# ----------------- GET USER FOLLOWERS ----------------- #
+@bp.route("/users/<string:public_user_id>/followers", methods=["GET"])
+@api_key_required
+def get_user_followers(public_user_id):
+    return get_user_followers_service(public_user_id)
+
+# ----------------- GET USER FOLLOWING ----------------- #
+@bp.route("/users/<string:public_user_id>/following", methods=["GET"])
+@api_key_required
+def get_user_following(public_user_id):
+    return get_user_following_service(public_user_id)
 
 # ----------------- FOLLOW USER ----------------- #
 @bp.route("/users/<string:followee_private_user_id>/follow", methods=["POST"])

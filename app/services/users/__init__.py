@@ -6,7 +6,8 @@ from app.services.users.delete_user import delete_user
 from app.services.users.update_user import update_user
 from app.services.users.follow_user import follow_user
 from app.services.users.unfollow_user import unfollow_user
-
+from app.services.users.get_user_followers import get_user_followers
+from app.services.users.get_user_following import get_user_following
 
 # ----------------- CREATE USER ----------------- #
 def create_user_service(user_data: dict) -> Tuple[Response, int]:
@@ -111,6 +112,36 @@ def delete_user_service(public_user_id: str) -> Tuple[Response, int]:
             - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
     return delete_user(public_user_id)
+
+# ----------------- GET USER FOLLOWERS ----------------- #
+def get_user_followers_service(private_user_id: str) -> Tuple[Response, int]:
+    """
+    Retrieve the list of followers for a user.
+
+    Args:
+        private_user_id (str): The public user ID of the user whose followers are to be retrieved.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - 200 OK: If the followers are successfully retrieved.
+            - 404 Not Found: If the user with the specified private_user_id is not found.
+    """
+    return get_user_followers(private_user_id)
+
+# ----------------- GET USER FOLLOWING ----------------- #
+def get_user_following_service(private_user_id: str) -> Tuple[Response, int]:
+    """
+    Retrieve the list of users that a user is following.
+
+    Args:
+        private_user_id (str): The private user ID of the user whose following list is to be retrieved.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - 200 OK: If the following list is successfully retrieved.
+            - 404 Not Found: If the user with the specified private_user_id is not found.
+    """
+    return get_user_following(private_user_id)
 
 # ----------------- FOLLOW USER ----------------- #
 def follow_user_service(follower_private_user_id: str, followee_private_user_id: str) -> Tuple[Response, int]:

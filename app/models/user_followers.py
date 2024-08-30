@@ -16,10 +16,15 @@ class UserFollowers(db.Model):
     def __repr__(self):
         return f"<UserFollowers {self.id}>"
     
-    def to_dict(self):
-        return {
+    def to_dict(self,exclude_fields: list= []):
+        data = {
             "follow_id": self.follow_id,
-            "follower": self.follower.to_dict(),
-            "followee": self.followee.to_dict(),
+            "follower": self.follower.as_dict(),
+            "followee": self.followee.as_dict(),
             "followed_at": self.followed_at
         }
+    
+        for field in exclude_fields:
+            data.pop(field, None)
+    
+        return data
