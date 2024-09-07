@@ -5,6 +5,7 @@ from app.services.posts.create_post import create_post
 from app.services.posts.delete_post import delete_post
 from app.services.posts.get_posts_for_user import get_posts_for_user
 from app.services.posts.react import react_to_post, unreact_to_post
+from app.services.posts.comment import get_comments_for_post, comment_on_post, delete_comment, like_comment, unlike_comment
 
 # ----------------- GET POSTS ----------------- #
 def get_posts_service(post_id: Optional[int], private_user_id: Optional[str]) -> Tuple[Response, int]:
@@ -160,3 +161,130 @@ def unreact_to_post_service(private_user_id: str, post_id: int) -> Tuple[Respons
             - If an error occurs during the unreaction process, returns a JSON response with an error message and a 500 status code
     """
     return unreact_to_post(private_user_id, post_id)
+
+# ----------------- GET POST COMMENTS ----------------- #
+def get_post_comments_service(post_id: int) -> Tuple[Response, int]:
+    """
+    Fetches comments for a specific post.
+
+    This function performs the following tasks:
+    - Retrieves the post from the database.
+    - Retrieves the comments associated with the post.
+    - Returns a JSON response containing the comments.
+
+    Args:
+        post_id (int): The ID of the post to retrieve comments for.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If comments are successfully retrieved, returns a JSON response with the comments and a 200 status code.
+            - If the post is not found, returns a JSON response with an error message and a 404 status code.
+            - If an error occurs during the retrieval process, returns a JSON response with an error message and a 500 status code.
+    """
+    return get_comments_for_post(post_id)
+
+# ----------------- COMMENT ON POST ----------------- #
+def comment_on_post_service(private_user_id: str, post_id: int, comment_data: dict) -> Tuple[Response, int]:
+    """
+    Adds a comment to a post.
+
+    This function performs the following tasks:
+    - Validates the required fields in the comment data.
+    - Checks if the user exists.
+    - Checks if the post exists.
+    - Checks if a parent comment ID is provided.
+    - Creates a new comment.
+    - Creates a new comment like count entry.
+
+    Args:
+        private_user_id (str): The private user ID of the user making the request.
+        post_id (int): The ID of the post to comment on.
+        comment_data (dict): The comment data.
+    
+    Returns:
+        Tuple[Response, int]: A JSON response and a status code.
+            - If successful, the response will contain a message indicating that the comment was added successfully and a status code of 201.
+            - If the post, user, or parent comment does not exist, the response will contain an error message and a status code of 404.
+            - If an error occurs, the response will contain an error message and a status code of 500.
+    """
+    return comment_on_post(private_user_id, post_id, comment_data)
+
+# ----------------- DELETE COMMENT ----------------- #
+def delete_comment_service(private_user_id: str, post_id: int, comment_id: int) -> Tuple[Response, int]:
+    """
+    Deletes a comment from a post.
+
+    This function performs the following tasks:
+    - Checks if the user exists.
+    - Checks if the post exists.
+    - Checks if the comment exists.
+    - Deletes the comment.
+
+    Args:
+        private_user_id (str): The private user ID of the user making the request.
+        post_id (int): The ID of the post containing the comment.
+        comment_id (int): The ID of the comment to delete.
+
+    Returns:
+        Tuple[Response, int]: A JSON response and a status code.
+            - If successful, the response will contain a message indicating that the comment was deleted successfully and a status code of 200.
+            - If the post, user, or comment does not exist, the response will contain an error message and a status code of 404.
+            - If an error occurs, the response will contain an error message and a status code of 500.
+    """
+    return delete_comment(private_user_id, post_id, comment_id)
+
+# ----------------- LIKE COMMENT ----------------- #
+def like_comment_service(private_user_id: str, post_id: int, comment_id: int) -> Tuple[Response, int]:
+    """
+    Likes a comment on a post.
+
+    This function performs the following tasks:
+    - Checks if the user exists.
+    - Checks if the post exists.
+    - Checks if the comment exists.
+    - Checks if the user has already liked the comment.
+    - Creates a new like for the comment.
+    - Increments the like count for the comment.
+    - Commits the changes to the database.
+
+    Args:
+        private_user_id (str): The private ID of the user liking the comment.
+        post_id (int): The ID of the post containing the comment.
+        comment_id (int): The ID of the comment to like.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If the comment is successfully liked, returns a JSON response with a success message and a 200 status code.
+            - If the user, post, or comment is not found, returns a JSON response with an error message and a 404 status code.
+            - If the comment is already liked by the user, returns a JSON response with an error message and a 400 status code.
+            - If an error occurs during the like process, returns a JSON response with an error message and a 500 status code
+    """
+    return like_comment(private_user_id, post_id, comment_id)
+
+# ----------------- UNLIKE COMMENT ----------------- #
+def unlike_comment_service(private_user_id: str, post_id: int, comment_id: int) -> Tuple[Response, int]:
+    """
+    Unlikes a comment on a post.
+
+    This function performs the following tasks:
+    - Checks if the user exists.
+    - Checks if the post exists.
+    - Checks if the comment exists.
+    - Checks if the user has already liked the comment.
+    - Deletes the like for the comment.
+    - Decrements the like count for the comment.
+    - Commits the changes to the database.
+
+    Args:
+        private_user_id (str): The private ID of the user unliking the comment.
+        post_id (int): The ID of the post containing the comment.
+        comment_id (int): The ID of the comment to unlike.
+
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If the comment is successfully unliked, returns a JSON response with a success message and a 200 status code.
+            - If the user, post, or comment is not found, returns a JSON response with an error message and a 404 status code.
+            - If the comment is not liked by the user, returns a JSON response with an error message and a 400 status code.
+            - If an error occurs during the unlike process, returns a JSON response with an error message and a 500 status code
+    """
+    return unlike_comment(private_user_id, post_id, comment_id)

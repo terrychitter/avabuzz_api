@@ -8,7 +8,12 @@ from app.services.posts import (
     delete_post_service,
     get_posts_for_user_service,
     react_to_post_service,
-    unreact_to_post_service
+    unreact_to_post_service,
+    get_post_comments_service,
+    comment_on_post_service,
+    delete_comment_service,
+    like_comment_service,
+    unlike_comment_service
 )
 
 bp = Blueprint("posts", __name__)
@@ -80,3 +85,48 @@ def unreact_to_post(post_id):
     # Get the user's private_user_id from the JWT
     private_user_id = get_jwt_identity()
     return unreact_to_post_service(private_user_id, post_id)
+
+# ----------------- GET POST COMMENTS ----------------- #
+@bp.route("/posts/<int:post_id>/comments", methods=["GET"])
+@api_key_required
+def get_post_comments(post_id):
+    return get_post_comments_service(post_id)
+
+
+# ----------------- COMMENT ON POST ----------------- #
+@bp.route("/posts/<int:post_id>/comments", methods=["POST"])
+@api_key_required
+@jwt_required()
+def comment_on_post(post_id):
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    # Extract comment data from the request body
+    comment_data = request.get_json()
+    return comment_on_post_service(private_user_id, post_id, comment_data)
+
+# ----------------- DELETE COMMENT ----------------- #
+@bp.route("/posts/<int:post_id>/comments/<int:comment_id>", methods=["DELETE"])
+@api_key_required
+@jwt_required()
+def delete_comment(post_id, comment_id):
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    return delete_comment_service(private_user_id, post_id, comment_id)
+
+# ----------------- LIKE COMMENT ----------------- #
+@bp.route("/posts/<int:post_id>/comments/<int:comment_id>/like", methods=["POST"])
+@api_key_required
+@jwt_required()
+def like_comment(post_id, comment_id):
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    return like_comment_service(private_user_id, post_id, comment_id)
+
+# ----------------- UNLIKE COMMENT ----------------- #
+@bp.route("/posts/<int:post_id>/comments/<int:comment_id>/like", methods=["DELETE"])
+@api_key_required
+@jwt_required()
+def unlike_comment(post_id, comment_id):
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    return unlike_comment_service(private_user_id, post_id, comment_id)

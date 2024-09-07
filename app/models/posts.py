@@ -127,6 +127,110 @@ class PostReactions(db.Model):
         
         return data
 
+class PostComments(db.Model):
+    __tablename__ = "post_comments"
+
+    class CommentStatus(Enum):
+        NORMAL = "NORMAL"
+        HIDDEN = "HIDDEN"
+        FLAGGED = "FLAGGED"
+
+    post_comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), nullable=False)
+    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    post_comment_text = db.Column(db.Text, nullable=False)
+    post_comment_status = db.Column(SQLAlchemyEnum(CommentStatus), nullable=False, default=CommentStatus.NORMAL)
+    parent_post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
+
+    # Define relationship to Posts model
+    post = db.relationship("Posts", back_populates="comments")
+
+    # Define relationship to Users model
+    user = db.relationship("Users", back_populates="comments")
+
+    # Define self-referential relationship for parent comments and replies
+    parent_comment = db.relationship("PostComments", backref=db.backref("replies", cascade="all, delete-orphan"), remote_side=[post_comment_id])
+
+    # Define relationship to PostCommentLikes model
+    likes = db.relationship("PostCommentLikes", back_populates="comment", cascade="all, delete-orphan")
+
+    # Define relationship to PostCommentLikeCounts model
+    like_count = db.relationship("PostCommentLikeCounts", back_populates="comment", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<PostComment {self.post_comment_id}>"
+    
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "id": self.post_comment_id,
+            "post_id": self.post_id,
+            "user": self.user.as_dict(),
+            "text": self.post_comment_text,
+            "status": self.post_comment_status.value,
+            "like_count": self.like_count[0].post_comment_like_count if self.like_count else 0,
+            "parent_post_comment_id": self.parent_post_comment_id,
+            "created_at": self.created_at,
+            "replies": [reply.as_dict() for reply in self.replies] if "replies" not in exclude_fields else []
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
+class PostCommentLikes(db.Model):
+    __tablename__ = "post_comment_likes"
+
+    post_comment_like_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=False)
+    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+
+    # Define relationship to PostComments model
+    comment = db.relationship("PostComments", back_populates="likes")
+
+    # Define relationship to Users model
+    user = db.relationship("Users", back_populates="comment_likes")
+
+    def __repr__(self):
+        return f"<PostCommentLike {self.post_comment_like_id}>"
+    
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "id": self.post_comment_like_id,
+            "comment_id": self.post_comment_id,
+            "user": self.user.as_dict(),
+            "created_at": self.created_at
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
+
+class PostCommentLikeCounts(db.Model):
+    __tablename__ = "post_comment_like_counts"
+
+    post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
+    post_comment_like_count = db.Column(db.Integer, nullable=False, default=0)
+
+    # Define relationship to PostComments model
+    comment = db.relationship("PostComments", back_populates="like_count")
+
+    def __repr__(self):
+        return f"<PostCommentLikeCount {self.post_comment_id}>"
+    
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "comment_id": self.post_comment_id,
+            "like_count": self.post_comment_like_count
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
+
 class Posts(db.Model):
     __tablename__ = "posts"
 
@@ -168,6 +272,9 @@ class Posts(db.Model):
 
     # Define relationship to PostReactionTypes model
     post_reactions = db.relationship("PostReactions", back_populates="post", cascade="all, delete-orphan")
+
+    # Define relationship to PostComments model
+    comments = db.relationship("PostComments", back_populates="post", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Post {self.post_id}>"

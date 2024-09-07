@@ -109,6 +109,12 @@ class Users(db.Model):
     # Define relationship to PostReactions model
     post_reactions = db.relationship("PostReactions", back_populates="user", cascade="all, delete-orphan")
 
+    # Define relationship to PostComments model
+    comments = db.relationship("PostComments", back_populates="user", cascade="all, delete-orphan")
+
+    # Define relationship to PostCommentLikes model
+    comment_likes = db.relationship("PostCommentLikes", back_populates="user", cascade="all, delete-orphan")
+
     def __repr__(self):
         return f"<User {self.private_user_id}>"
 
@@ -139,12 +145,10 @@ class Users(db.Model):
             )
 
         return {
-            "private_user_id": self.private_user_id,
             "public_user_id": self.public_user_id,
             "username": self.username,
             "email": self.email,
             "friend_code": self.friend_code,
-            "password_hash": self.password_hash,
             "profile_picture_url": self.profile_picture_url,
             "gender": self.gender,
             "country": self.country,
