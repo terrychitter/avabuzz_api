@@ -5,11 +5,12 @@ from app.models.posts import Posts
 from app.models.users import Users, UserStats
 
 
-def delete_post(post_id: int) -> Tuple[Response, int]:
+def delete_post(private_user_id: str, post_id: int) -> Tuple[Response, int]:
     """
     Deletes a post from the database based on the post ID.
 
     Args:
+        private_user_id (str): The private user ID of the user deleting the post.
         post_id (int): The ID of the post to delete.
 
     Returns:
@@ -21,9 +22,14 @@ def delete_post(post_id: int) -> Tuple[Response, int]:
     # Query the post from the database
     post = Posts.query.filter_by(post_id=post_id).first()
 
+    # Check if the post exists
     if post is None:
         # If the post is not found, return a 404 error
         return jsonify({"message": "Post not found"}), 404
+    
+    # Check if the user is authorized to delete the post
+    if post.user_id != private_user_id:
+        return jsonify({"message": "Unauthorized to delete this post"}), 403
 
     try:
         # Decrease the post count for the user

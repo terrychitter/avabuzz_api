@@ -4,13 +4,13 @@ from app.models import Users, UserFollowers, UserStats
 from app import db
 
 
-def follow_user(follower_private_user_id: str, followee_private_user_id: str) -> Tuple[Response, int]:
+def follow_user(follower_private_user_id: str, followee_public_user_id: str) -> Tuple[Response, int]:
     """
     Follow a user
 
     Args:
         follower_private_user_id (str): The private_user_id of the user following the other user
-        followee_private_user_id (str): The private_user_id of the user being followed
+        followee_public_user_id (str): The private_user_id of the user being followed
 
     Returns:
         Tuple[Response, int]: A tuple containing the response and the status code
@@ -25,7 +25,7 @@ def follow_user(follower_private_user_id: str, followee_private_user_id: str) ->
         return {"message": "Follower not found"}, 404
     
     # Check if the followee exists in the database
-    followee = Users.query.filter_by(private_user_id=followee_private_user_id).first()
+    followee = Users.query.filter_by(public_user_id=followee_public_user_id).first()
     if not followee:
         return {"message": "Followee not found"}, 404
     

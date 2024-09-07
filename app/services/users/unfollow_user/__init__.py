@@ -4,13 +4,13 @@ from flask import Response, jsonify
 from app.models import Users, UserFollowers, UserStats
 
 
-def unfollow_user(unfollower_private_user_id: str, unfollowee_private_user_id) -> Tuple[Response, int]:
+def unfollow_user(unfollower_private_user_id: str, unfollowee_public_user_id: str) -> Tuple[Response, int]:
     """
     Unfollow a user
 
     Args:
         unfollower_private_user_id (str): The private_user_id of the user unfollowing the other user
-        followee_private_user_id (str): The private_user_id of the user being unfollowed
+        unfollowee_public_user_id (str): The private_user_id of the user being unfollowed
     
     Returns:
         Tuple[Response, int]: A tuple containing the response and the status code
@@ -25,7 +25,7 @@ def unfollow_user(unfollower_private_user_id: str, unfollowee_private_user_id) -
         return jsonify({"message": "Unfollower not found"}), 404
     
     # Check if the unfollowee exists in the database
-    unfollowee = Users.query.filter_by(private_user_id=unfollowee_private_user_id).first()
+    unfollowee = Users.query.filter_by(public_user_id=unfollowee_public_user_id).first()
     if not unfollowee:
         return jsonify({"message": "Unfollowee not found"}), 404
     
@@ -34,7 +34,7 @@ def unfollow_user(unfollower_private_user_id: str, unfollowee_private_user_id) -
         return jsonify({"message": "Unfollower cannot unfollow themselves"}), 400
     
     # Check if the unfollower is following the unfollowee
-    follow = UserFollowers.query.filter_by(follower_user_id=unfollower_private_user_id, followee_user_id=unfollowee_private_user_id).first()
+    follow = UserFollowers.query.filter_by(follower_user_id=unfollower_private_user_id, followee_user_id=unfollowee.private_user_id).first()
     if not follow:
         return jsonify({"message": "Unfollower is not following this unfollowee"}), 400
     

@@ -1,3 +1,4 @@
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import db
 from flask import Blueprint, request
 from app.services.auth import api_key_required
@@ -38,18 +39,26 @@ def create_user():
     return create_user_service(user_data)
 
 # ----------------- UPDATE USER ----------------- #
-@bp.route("/users/<string:public_user_id>", methods=["PUT"])
+@bp.route("/users", methods=["PUT"])
 @api_key_required
-def update_user(public_user_id):
+@jwt_required()
+def update_user():
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+
     # Extract user data from the request body
     user_data = request.get_json()
-    return update_user_service(public_user_id, user_data)
+    return update_user_service(private_user_id, user_data)
 
 # ----------------- DELETE USER ----------------- #
-@bp.route("/users/<string:public_user_id>", methods=["DELETE"])
+@bp.route("/users", methods=["DELETE"])
 @api_key_required
-def delete_user(public_user_id):
-    return delete_user_service(public_user_id)
+@jwt_required()
+def delete_user(private_user_id):
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    
+    return delete_user_service(private_user_id)
 
 # ----------------- GET USER FOLLOWERS ----------------- #
 @bp.route("/users/<string:public_user_id>/followers", methods=["GET"])
@@ -64,17 +73,19 @@ def get_user_following(public_user_id):
     return get_user_following_service(public_user_id)
 
 # ----------------- FOLLOW USER ----------------- #
-@bp.route("/users/<string:followee_private_user_id>/follow", methods=["POST"])
+@bp.route("/users/<string:followee_public_user_id>/follow", methods=["POST"])
 @api_key_required
-def follow_user(followee_private_user_id):
-    # Extract the followers private_user_id from the request body
-    follower_private_user_id = request.get_json().get("private_user_id")
-    return follow_user_service(follower_private_user_id, followee_private_user_id)
+@jwt_required()
+def follow_user(followee_public_user_id):
+    # Get the follower's private_user_id from the JWT
+    follower_private_user_id = get_jwt_identity()
+    return follow_user_service(follower_private_user_id, followee_public_user_id)
 
 # ----------------- UNFOLLOW USER ----------------- #
-@bp.route("/users/<string:unfollowee_private_user_id>/unfollow", methods=["POST"])
+@bp.route("/users/<string:unfollowee_public_user_id>/unfollow", methods=["POST"])
 @api_key_required
-def unfollow_user(unfollowee_private_user_id):
-    # Extract the followers private_user_id from the request body
-    unfollower_private_user_id = request.get_json().get("private_user_id")
-    return unfollow_user_service(unfollower_private_user_id, unfollowee_private_user_id)
+@jwt_required()
+def unfollow_user(unfollowee_public_user_id):
+    # Extract the followers private_user_id from the JWT
+    unfollower_private_user_id = get_jwt_identity()
+    return unfollow_user_service(unfollower_private_user_id, unfollowee_public_user_id)

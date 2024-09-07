@@ -6,11 +6,12 @@ from app.models import PostCategories, PostMedia, Posts, PostHashTags, PostReact
 from app.models.hashtags import HashTags
 from app.utils.validation_utils import validate_required_fields
 
-def create_post(post_data: dict) -> Tuple[Response, int]:
+def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
     """
     Creates a new post in the database based on the provided post data.
 
     Args:
+        private_user_id (str): The private user ID of the user creating the post.
         post_data (dict): A dictionary containing the data required to create a post. The expected fields are:
             - "post_caption" (str, optional): The caption of the post.
             - "media_urls" (list of dict, optional): A list of dictionaries containing media information. Each dictionary should have:
@@ -18,8 +19,6 @@ def create_post(post_data: dict) -> Tuple[Response, int]:
                 - "size" (int): The size of the media in bytes.
             - "post_type" (str, required): The type of the post, which must match one of the PostType enumeration members.
             - "post_category_id" (int, required): The ID of the post category.
-            - "private_user_id" (int, optional): The ID of the user if the post is private to a specific user.
-            - "private_group_id" (int, optional): The ID of the group if the post is private to a specific group.
             - "hashtags" (list of str, optional): A list of hashtags associated with the post.
 
     Returns:
@@ -52,23 +51,18 @@ def create_post(post_data: dict) -> Tuple[Response, int]:
         required_conditions = [
             {"fields": ["post_caption", "media_urls"], "message": "Either 'post_caption' or 'media_urls' is required."},
             {"fields": ["post_type"], "message": "'post_type' is required."},
-            {"fields": ["post_category_id"], "message": "'post_category_id' is required."},
-            {"fields": ["private_user_id", "private_group_id"], "message": "Either 'private_user_id' or 'private_group_id' is required.", "exclusive": True}
+            {"fields": ["post_category_id"], "message": "'post_category_id' is required."}
         ]
         
-        # Validate required fields using the reusable method
+        # Validate required fields
         validation_error, status_code = validate_required_fields(post_data, required_conditions)
         if validation_error:
             return validation_error, status_code
         
-        # If user_id is provided, check if the user exists
-        if "private_user_id" in post_data:
-            user = Users.query.filter_by(private_user_id=post_data["private_user_id"]).first()
-            if not user:
-                return jsonify({"message": "User not found"}), 404
-            
-        # If group_id is provided, check if the group exists
-        # TODO: Add group validation here
+        # Check if the user exists
+        user = Users.query.get(private_user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
 
         # Check if the category exists
         category = PostCategories.query.get(post_data["post_category_id"])
@@ -84,11 +78,11 @@ def create_post(post_data: dict) -> Tuple[Response, int]:
             post_caption=post_data.get("post_caption"),
             post_type=Posts.PostType[post_data["post_type"]],
             post_category_id=post_data["post_category_id"],
-            user_id=post_data.get("private_user_id"),
+            user_id=private_user_id,
         )
 
         # Increment the post count for the user
-        user_stats = UserStats.query.filter_by(user_id=post_data["private_user_id"]).first()
+        user_stats = UserStats.query.filter_by(user_id=private_user_id).first()
         user_stats.post_count += 1
 
         # Save the post to the database first
@@ -105,17 +99,18 @@ def create_post(post_data: dict) -> Tuple[Response, int]:
         # Commit the initial post and reaction counts to the database
         db.session.commit()
         
-        # Add the media to the post
-        for index, media_data in enumerate(post_data["media_urls"]):
-            media_url = media_data["url"]
-            media_size = media_data["size"]
-            media = PostMedia(
-                post_id=new_post.post_id,
-                media_url=media_url,
-                media_size_bytes=media_size,
-                media_order=index
-            )
-            db.session.add(media)
+        # Add the media to the post if available
+        if "media_urls" in post_data:
+            for index, media_data in enumerate(post_data["media_urls"]):
+                media_url = media_data["url"]
+                media_size = media_data["size"]
+                media = PostMedia(
+                    post_id=new_post.post_id,
+                    media_url=media_url,
+                    media_size_bytes=media_size,
+                    media_order=index
+                )
+                db.session.add(media)
 
         # Add the hashtags to the post
         if "hashtags" in post_data:

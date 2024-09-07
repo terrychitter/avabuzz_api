@@ -74,16 +74,16 @@ class Users(db.Model):
     public_user_id = db.Column(db.String(10), unique=True, nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
+    friend_code = db.Column(db.String(10), nullable=True, default=None)
     password_hash = db.Column(db.String(255), nullable=False)
     profile_picture_url = db.Column(db.String(255), nullable=True, default="https://placehold.co/400")
-    gender = db.Column(db.String(20), nullable=True, default="None")
-    country = db.Column(db.String(255), nullable=True, default="None")
-    orientation = db.Column(db.String(20), nullable=True, default="None")
+    gender = db.Column(db.String(20), nullable=True, default=None)
+    country = db.Column(db.String(255), nullable=True, default=None)
+    orientation = db.Column(db.String(20), nullable=True, default=None)
     biography = db.Column(db.Text, nullable=True)
     user_type = db.Column(db.Enum(UserType), nullable=False, default=UserType.user)
     birthdate = db.Column(db.Date, nullable=True, default=None)
     created_at = db.Column(db.DateTime, nullable=False, default=func.now())
-    active = db.Column(db.Boolean, nullable=False, default=True)
 
     # Define relationship to UserStats model
     stats = db.relationship("UserStats", uselist=False, back_populates="user", cascade="all, delete-orphan")
@@ -105,6 +105,9 @@ class Users(db.Model):
     following = db.relationship(
         "UserFollowers", foreign_keys="[UserFollowers.followee_user_id]", back_populates="follower", cascade="all, delete-orphan", uselist=True
     )
+
+    # Define relationship to PostReactions model
+    post_reactions = db.relationship("PostReactions", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.private_user_id}>"
@@ -140,6 +143,7 @@ class Users(db.Model):
             "public_user_id": self.public_user_id,
             "username": self.username,
             "email": self.email,
+            "friend_code": self.friend_code,
             "password_hash": self.password_hash,
             "profile_picture_url": self.profile_picture_url,
             "gender": self.gender,
@@ -149,7 +153,6 @@ class Users(db.Model):
             "user_type": self.user_type.value,
             "birth_date": self.birthdate,
             "created_at": self.created_at,
-            "active": self.active,
             "user_stats": {
                 "follower_count": user_stats.follower_count if user_stats else None,
                 "following_count": user_stats.following_count if user_stats else None,

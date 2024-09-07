@@ -67,12 +67,12 @@ def get_users_service(public_user_id: Optional[str]=None) -> Tuple[Response, int
     return get_users(public_user_id)
 
 # ----------------- UPDATE THE USER ----------------- #
-def update_user_service(public_user_id: str, user_data: dict) -> Tuple[Response, int]:
+def update_user_service(private_user_id: str, user_data: dict) -> Tuple[Response, int]:
     """
     Update user information in the database.
 
     Args:
-        public_user_id (str): The public user ID of the user to be updated.
+        private_user_id (str): The private user ID of the user to be updated.
                               This ID is used to find the specific user in the database.
         user_data (dict): A dictionary containing the fields to be updated and their new values.
                           Valid fields include 'username', 'email', 'password', and any other fields
@@ -83,19 +83,19 @@ def update_user_service(public_user_id: str, user_data: dict) -> Tuple[Response,
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
             - 200 OK: If the user is successfully updated.
             - 400 Bad Request: If a duplicate username or email is found, or if invalid fields are provided.
-            - 404 Not Found: If no user with the specified public_user_id is found.
+            - 404 Not Found: If no user with the specified private_user_id is found.
             - 500 Internal Server Error: If an unexpected error occurs during the process.
 
     Raises:
         - 400 Bad Request: If the username or email already exists in the database or if invalid fields are provided.
-        - 404 Not Found: If the user with the specified public_user_id is not found in the database.
+        - 404 Not Found: If the user with the specified private_user_id is not found in the database.
         - 500 Internal Server Error: If an unexpected error occurs, such as a database failure.
 
     Notes:
-        - The 'public_user_id' and 'private_user_id' fields are not modifiable through this function.
+        - The 'private_user_id' and 'public_user_id' fields are not modifiable through this function.
         - The 'password' field is hashed using Werkzeug's `generate_password_hash` function before updating.
     """
-    return update_user(public_user_id, user_data)
+    return update_user(private_user_id, user_data)
 
 # ----------------- DELETE USER ----------------- #
 def delete_user_service(public_user_id: str) -> Tuple[Response, int]:
@@ -114,19 +114,19 @@ def delete_user_service(public_user_id: str) -> Tuple[Response, int]:
     return delete_user(public_user_id)
 
 # ----------------- GET USER FOLLOWERS ----------------- #
-def get_user_followers_service(private_user_id: str) -> Tuple[Response, int]:
+def get_user_followers_service(public_user_id: str) -> Tuple[Response, int]:
     """
     Retrieve the list of followers for a user.
 
     Args:
-        private_user_id (str): The public user ID of the user whose followers are to be retrieved.
+        public_user_id (str): The public user ID of the user whose followers are to be retrieved.
 
     Returns:
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
             - 200 OK: If the followers are successfully retrieved.
-            - 404 Not Found: If the user with the specified private_user_id is not found.
+            - 404 Not Found: If the user with the specified public_user_id is not found.
     """
-    return get_user_followers(private_user_id)
+    return get_user_followers(public_user_id)
 
 # ----------------- GET USER FOLLOWING ----------------- #
 def get_user_following_service(private_user_id: str) -> Tuple[Response, int]:
@@ -144,13 +144,13 @@ def get_user_following_service(private_user_id: str) -> Tuple[Response, int]:
     return get_user_following(private_user_id)
 
 # ----------------- FOLLOW USER ----------------- #
-def follow_user_service(follower_private_user_id: str, followee_private_user_id: str) -> Tuple[Response, int]:
+def follow_user_service(follower_private_user_id: str, followee_public_user_id: str) -> Tuple[Response, int]:
     """
     Follow a user
 
     Args:
         follower_private_user_id (str): The private_user_id of the user following the other user
-        followee_private_user_id (str): The private_user_id of the user being followed
+        followee_public_user_id (str): The public_user_id of the user being followed
 
     Returns:
         Tuple[Response, int]: A tuple containing the response and the status code
@@ -159,16 +159,16 @@ def follow_user_service(follower_private_user_id: str, followee_private_user_id:
             - 404 Not Found: If the follower or followee is not found
             - 500 Internal Server Error: If an unexpected error occurs while following the user
     """
-    return follow_user(follower_private_user_id, followee_private_user_id)
+    return follow_user(follower_private_user_id, followee_public_user_id)
 
 # ----------------- UNFOLLOW USER ----------------- #
-def unfollow_user_service(unfollower_private_user_id: str, unfollowee_private_user_id: str) -> Tuple[Response, int]:
+def unfollow_user_service(unfollower_private_user_id: str, unfollowee_public_user_id: str) -> Tuple[Response, int]:
     """
     Unfollow a user
 
     Args:
         unfollower_private_user_id (str): The private_user_id of the user unfollowing the other user
-        followee_private_user_id (str): The private_user_id of the user being unfollowed
+        unfollowee_public_user_id (str): The public_user_id of the user being unfollowed
     
     Returns:
         Tuple[Response, int]: A tuple containing the response and the status code
@@ -177,4 +177,4 @@ def unfollow_user_service(unfollower_private_user_id: str, unfollowee_private_us
             - 404 Not Found: If the unfollower or unfollowee is not found
             - 500 Internal Server Error: If an unexpected error occurs while unfollowing the user
     """
-    return unfollow_user(unfollower_private_user_id, unfollowee_private_user_id)
+    return unfollow_user(unfollower_private_user_id, unfollowee_public_user_id)

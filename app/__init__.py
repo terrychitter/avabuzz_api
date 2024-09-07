@@ -1,4 +1,6 @@
+import os
 from flask import Flask, jsonify
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.automap import automap_base
 from flask_migrate import Migrate
@@ -16,6 +18,10 @@ def create_app(config_class=Config):
 
     # Initialize Migrate
     migrate = Migrate(app, db)
+
+    # JWT
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    jwt = JWTManager(app)
 
     # Initialize CORS
     CORS(app, resources={r"/*": {"origins": "*"}})

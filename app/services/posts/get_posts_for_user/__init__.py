@@ -4,12 +4,12 @@ from app.models.posts import Posts
 from app.models.users import Users
 
 
-def get_posts_for_user(private_user_id) -> Tuple[Response, int]:
+def get_posts_for_user(public_user_id: str) -> Tuple[Response, int]:
     """
     Fetches posts from the database for a specific user.
 
     Args:
-        private_user_id (int): The ID of the user to retrieve posts for.
+        public_user_id (int): The ID of the user to retrieve posts for.
 
     Returns:
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
@@ -17,13 +17,13 @@ def get_posts_for_user(private_user_id) -> Tuple[Response, int]:
             - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
     # Check if the user exists in the database
-    user = Users.query.filter_by(private_user_id=private_user_id).first()
+    user = Users.query.filter_by(public_user_id=public_user_id).first()
 
     if user is None:
         return jsonify({"message": "User not found"}), 404
     
     # Query posts for the specified user
-    posts = Posts.query.filter_by(user_id=private_user_id).all()
+    posts = Posts.query.filter_by(user_id=user.private_user_id).all()
 
     # Return posts
     return jsonify([post.to_dict(exclude_fields=["user"]) for post in posts]), 200

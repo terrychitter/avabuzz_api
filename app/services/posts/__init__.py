@@ -4,6 +4,7 @@ from app.services.posts.get_posts import get_posts
 from app.services.posts.create_post import create_post
 from app.services.posts.delete_post import delete_post
 from app.services.posts.get_posts_for_user import get_posts_for_user
+from app.services.posts.react import react_to_post, unreact_to_post
 
 # ----------------- GET POSTS ----------------- #
 def get_posts_service(post_id: Optional[int] = None) -> Tuple[Response, int]:
@@ -33,11 +34,12 @@ def get_posts_service(post_id: Optional[int] = None) -> Tuple[Response, int]:
     return get_posts(post_id)
 
 # ----------------- CREATE POST ----------------- #
-def create_post_service(post_data: dict) -> Tuple[Response, int]:
+def create_post_service(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
     """
     Creates a new post in the database based on the provided post data.
 
     Args:
+        private_user_id (str): The private user ID of the user creating the post.
         post_data (dict): A dictionary containing the data required to create a post. The expected fields are:
             - "post_caption" (str, optional): The caption of the post.
             - "media_urls" (list of dict, optional): A list of dictionaries containing media information. Each dictionary should have:
@@ -73,14 +75,15 @@ def create_post_service(post_data: dict) -> Tuple[Response, int]:
         - ValidationError: If required fields are missing or invalid.
         - DatabaseError: If an error occurs during database operations.
     """
-    return create_post(post_data)
+    return create_post(private_user_id, post_data)
 
 # ----------------- DELETE POST ----------------- #
-def delete_post_service(post_id: int) -> Tuple[Response, int]:
+def delete_post_service(private_user_id: str, post_id: int) -> Tuple[Response, int]:
     """
     Deletes a post from the database based on the post ID.
 
     Args:
+        private_user_id (str): The private user ID of the user deleting the post.
         post_id (int): The ID of the post to delete.
 
     Returns:
@@ -89,19 +92,50 @@ def delete_post_service(post_id: int) -> Tuple[Response, int]:
             - If the post is not found, returns a JSON response with an error message and a 404 status code.
             - If an error occurs during deletion, returns a JSON response with an error message and a 500 status code.
     """
-    return delete_post(post_id)
+    return delete_post(private_user_id, post_id)
 
 # ----------------- GET POSTS BY USER ----------------- #
-def get_posts_for_user_service(private_user_id: int) -> Tuple[Response, int]:
+def get_posts_for_user_service(public_user_id: str) -> Tuple[Response, int]:
     """
     Fetches posts from the database for a specific user.
 
     Args:
-        private_user_id (int): The ID of the user to retrieve posts for.
+        public_user_id (str): The ID of the user to retrieve posts for.
 
     Returns:
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
             - If posts are successfully retrieved, returns a JSON response with the post details and a 200 status code.
             - If the user is not found, returns a JSON response with an error message and a 404 status code.
     """
-    return get_posts_for_user(private_user_id)
+    return get_posts_for_user(public_user_id)
+
+# ----------------- REACT TO POST ----------------- #
+def react_to_post_service(private_user_id: str, post_id: int, reaction: str) -> Tuple[Response, int]:
+    """
+    Reacts to a post with the specified reaction.
+
+    This function performs the following tasks:
+    - Checks if the user exists in the database.
+    - Checks if the post exists in the database.
+    - Checks if the reaction type is valid.
+    - Checks if the user has already reacted to the post.
+    - Updates the reaction count for the post based on the new reaction.
+    - Commits the changes to the database.
+
+    Args:
+        private_user_id (str): The private user ID of the user reacting to the post.
+        post_id (int): The ID of the post to react to.
+        reaction (str): The reaction type to apply to the post.
+    
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If the reaction is successfully applied, returns a JSON response with a success message and a 200 status code.
+            - If the user or post is not found, returns a JSON response with an error message and a 404 status code.
+            - If the reaction type is invalid, returns a JSON response with an error message and a 400 status code.
+            - If an error occurs during the reaction process, returns a JSON response with an error message and a 500 status code.
+    """
+    return react_to_post(private_user_id, post_id, reaction)
+
+# ----------------- UNREACT TO POST ----------------- #
+def unreact_to_post_service(private_user_id: str, post_id: int) -> Tuple[Response, int]:
+    return unreact_to_post(private_user_id, post_id)

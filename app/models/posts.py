@@ -90,8 +90,36 @@ class PostReactionCounts(db.Model):
     def as_dict(self, exclude_fields: list = []):
         data = {
             "post_id": self.post_id,
-            "reaction_type": self.post_reaction_type,
-            "reaction_count": self.reaction_count
+            "type": self.post_reaction_type,
+            "count": self.reaction_count
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
+    
+class PostReactions(db.Model):
+    __tablename__ = "post_reactions"
+
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), primary_key=True)
+    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
+    post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+
+    # Define relationship to Users model
+    user = db.relationship("Users", back_populates="post_reactions")
+
+    # Define relationship to Posts model
+    post = db.relationship("Posts", back_populates="post_reactions")
+
+    def __repr__(self):
+        return f"<PostReaction {self.post_id}-{self.user_id}-{self.post_reaction_type}>"
+    
+    def as_dict(self, exclude_fields: list = []):
+        data = {
+            "post_id": self.post_id,
+            "user_id": self.user_id,
+            "reaction": self.post_reaction_type
         }
 
         for field in exclude_fields:
@@ -137,6 +165,9 @@ class Posts(db.Model):
 
     # Define relationship to PostReactionCounts model
     reactions = db.relationship("PostReactionCounts", backref="post", cascade="all, delete-orphan")
+
+    # Define relationship to PostReactionTypes model
+    post_reactions = db.relationship("PostReactions", back_populates="post", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Post {self.post_id}>"
