@@ -172,21 +172,28 @@ class Posts(db.Model):
     def __repr__(self):
         return f"<Post {self.post_id}>"
     
-    def to_dict(self, exclude_fields: list =[]):
+    def to_dict(self, user_id=None, exclude_fields: list = ["user_reacted"]):
         data = {
             "id": self.post_id,
             "caption": self.post_caption,
             "type": self.post_type.value,
             "category": self.post_category.as_dict(),
             "view_count": self.view_count,
-            "user": self.user.as_dict(),
+            "poster": self.user.as_dict(),
             "created_at": self.created_at,
             "hashtags": [tag.hashtag.as_dict()["hashtag_name"] for tag in self.post_hashtags],
             "media": [media.as_dict() for media in self.media],
-            "reactions": [reaction.as_dict(exclude_fields=["post_id"]) for reaction in self.reactions]
+            "reactions": [reaction.as_dict(exclude_fields=["post_id"]) for reaction in self.reactions],
         }
+        
+        # Check if user_id is provided, to fetch their reaction
+        if user_id:
+            user_reaction = next((reaction for reaction in self.post_reactions if reaction.user_id == user_id), None)
+            data["user_reacted"] = bool(user_reaction)  # True if user has reacted, False otherwise
+            data["user_reaction_type"] = user_reaction.post_reaction_type if user_reaction else None
 
-
+        # Remove excluded fields from the dictionary
         for field in exclude_fields:
             data.pop(field, None)
+        
         return data

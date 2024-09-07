@@ -7,7 +7,7 @@ from app.services.posts.get_posts_for_user import get_posts_for_user
 from app.services.posts.react import react_to_post, unreact_to_post
 
 # ----------------- GET POSTS ----------------- #
-def get_posts_service(post_id: Optional[int] = None) -> Tuple[Response, int]:
+def get_posts_service(post_id: Optional[int], private_user_id: Optional[str]) -> Tuple[Response, int]:
     """
     Fetches posts from the database, either a specific post by ID or all posts.
 
@@ -31,7 +31,7 @@ def get_posts_service(post_id: Optional[int] = None) -> Tuple[Response, int]:
     Raises:
         - 404 Not Found: If a specific post ID is provided but no matching post is found in the database.
     """
-    return get_posts(post_id)
+    return get_posts(post_id, private_user_id)
 
 # ----------------- CREATE POST ----------------- #
 def create_post_service(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
@@ -138,4 +138,25 @@ def react_to_post_service(private_user_id: str, post_id: int, reaction: str) -> 
 
 # ----------------- UNREACT TO POST ----------------- #
 def unreact_to_post_service(private_user_id: str, post_id: int) -> Tuple[Response, int]:
+    """
+    Removes the user's reaction to a post.
+
+    This function performs the following tasks:
+    - Checks if the user exists in the database.
+    - Checks if the post exists in the database.
+    - Checks if the user has already reacted to the post.
+    - Updates the reaction count for the post based on the removed reaction.
+    - Commits the changes to the database.
+
+    Args:
+        private_user_id (str): The private user ID of the user unreacting to the post.
+        post_id (int): The ID of the post to unreact to.
+    
+    Returns:
+        Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
+            - If the user successfully unreacts to the post, returns a JSON response with a success message and a 200 status code.
+            - If the user or post is not found, returns a JSON response with an error message and a 404 status code.
+            - If the user has not reacted to the post, returns a JSON response with an error message and a 400 status code.
+            - If an error occurs during the unreaction process, returns a JSON response with an error message and a 500 status code
+    """
     return unreact_to_post(private_user_id, post_id)

@@ -1,4 +1,4 @@
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from app import db
 from flask import Blueprint, request
 from app.services.auth import api_key_required
@@ -18,13 +18,23 @@ bp = Blueprint("posts", __name__)
 @bp.route("/posts", methods=["GET"])
 @api_key_required
 def get_posts():
-    return get_posts_service()
+    try:
+        verify_jwt_in_request()
+        private_user_id = get_jwt_identity()
+        return get_posts_service(post_id=None, private_user_id=private_user_id)
+    except:
+        return get_posts_service(None, None)
 
 # ----------------- GET POST BY ID ----------------- #
 @bp.route("/posts/<int:post_id>", methods=["GET"])
 @api_key_required
 def get_post_by_id(post_id):
-    return get_posts_service(post_id=post_id)
+    try:
+        verify_jwt_in_request()
+        private_user_id = get_jwt_identity()
+        return get_posts_service(post_id=post_id, private_user_id=private_user_id)
+    except:
+        return get_posts_service(post_id=post_id, private_user_id=None)
 
 # ----------------- CREATE NEW POST ----------------- #
 @bp.route("/posts", methods=["POST"])

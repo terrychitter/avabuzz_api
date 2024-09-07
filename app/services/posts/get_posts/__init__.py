@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 from flask import Response, jsonify
 from app.models.posts import Posts
 
-def get_posts(post_id: Optional[int] = None) -> Tuple[Response, int]:
+def get_posts(post_id: Optional[int], private_user_id: Optional[str]) -> Tuple[Response, int]:
     """
     Fetches posts from the database, either a specific post by ID or all posts.
 
@@ -31,9 +31,8 @@ def get_posts(post_id: Optional[int] = None) -> Tuple[Response, int]:
         post = Posts.query.get(post_id)
         if not post:
             return jsonify({"error": "Post not found"}), 404
-        return jsonify(post.to_dict()), 200
+        return jsonify(post.to_dict(user_id=private_user_id if private_user_id else None)), 200
     
     # Get all posts if post_id is not provided
     posts = Posts.query.all()
-
-    return jsonify([post.to_dict() for post in posts]), 200
+    return jsonify([post.to_dict(user_id=private_user_id if private_user_id else None) for post in posts]), 200
