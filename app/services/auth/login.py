@@ -1,4 +1,5 @@
 import datetime
+from config import Config
 from typing import Dict, Tuple
 from flask import Response, jsonify
 from app.models import Users
@@ -50,6 +51,11 @@ def login(login_data: Dict[str, str]) -> Tuple[Response, int]:
         access_token = create_access_token(identity=user.private_user_id)
         refresh_token = create_refresh_token(identity=user.private_user_id)
 
-        return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
+        return jsonify(
+            {"access_token": access_token,
+             "refresh_token": refresh_token,
+             "access_token_expires": Config.JWT_ACCESS_TOKEN_EXPIRES,
+             "refresh_expires" : Config.JWT_REFRESH_TOKEN_EXPIRES
+             }), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
