@@ -5,6 +5,7 @@ from app.services.auth import api_key_required
 from app.services.users import (
     create_user_service,
     get_users_service,
+    get_me_service,
     delete_user_service,
     update_user_service,
     get_user_followers_service,
@@ -21,6 +22,15 @@ bp = Blueprint("users", __name__)
 @api_key_required
 def get_users():
     return get_users_service()
+
+# ----------------- GET LOGGED IN USER ----------------- #
+@bp.route("/users/me", methods=["GET"])
+@api_key_required
+@jwt_required()
+def get_logged_in_user():
+    # Get the user's private_user_id from the JWT
+    private_user_id = get_jwt_identity()
+    return get_me_service(private_user_id)
 
 
 # ----------------- GET USER BY PUBLIC ID ----------------- #

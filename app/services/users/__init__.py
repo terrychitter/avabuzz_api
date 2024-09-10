@@ -2,6 +2,7 @@ from flask import Response
 from typing import Optional, Tuple
 from app.services.users.create_user import create_user
 from app.services.users.get_users import get_users
+from app.services.users.get_me import get_me
 from app.services.users.delete_user import delete_user
 from app.services.users.update_user import update_user
 from app.services.users.follow_user import follow_user
@@ -41,6 +42,10 @@ def create_user_service(user_data: dict) -> Tuple[Response, int]:
         - 500 Internal Server Error: If an error occurs during database operations.
     """
     return create_user(user_data)
+
+# ----------------- GET LOGGED IN USER ----------------- #
+def get_me_service(private_user_id: str) -> Tuple[Response, int]:
+    return get_me(private_user_id)
 
 # ----------------- GET USERS ----------------- #
 def get_users_service(public_user_id: Optional[str]=None) -> Tuple[Response, int]:
