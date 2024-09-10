@@ -2,7 +2,6 @@ import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.automap import automap_base
 from flask_migrate import Migrate
 from config import Config
 from flask_cors import CORS
@@ -16,23 +15,21 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Initialize Migrate
-    migrate = Migrate(app, db)
-
-    # JWT
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-    jwt = JWTManager(app)
-
     # Initialize CORS
     CORS(app, resources={r"/*": {"origins": "*"}})
 
+    from app.services.jwt import jwt
+    jwt.init_app(app)
+
     # Initialize SQLAlchemy
     db.init_app(app)
+    # Initialize Migrate
+    migrate = Migrate(app, db)
 
     # Register blueprints
     from app.api.v1 import bp as api_v1_bp
-
     app.register_blueprint(api_v1_bp, url_prefix="/api/v1")
+
 
     # Custom error handlers
     @app.errorhandler(400)

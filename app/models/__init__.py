@@ -1,3 +1,4 @@
+from app.models.jwt_token_blocklist import JWTTokenBlocklist
 from app.models.users import Users, UserStats, UserProfileAccessories
 from app.models.user_followers import UserFollowers
 from app.models.user_groups import UserGroups
