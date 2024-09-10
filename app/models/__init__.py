@@ -1,5 +1,6 @@
 from app.models.jwt_token_blocklist import JWTTokenBlocklist
 from app.models.users import Users, UserStats, UserProfileAccessories
+from app.models.blocked_users import BlockedUsers
 from app.models.user_followers import UserFollowers
 from app.models.user_groups import UserGroups
 from app.models.hashtags import HashTags

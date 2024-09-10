@@ -1,5 +1,4 @@
-from app import db
-from flask import Blueprint, request
+from flask import Blueprint
 from app.services.auth import api_key_required
 from app.services.hashtags import (
     get_hashtags_service,

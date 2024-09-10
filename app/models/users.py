@@ -115,6 +115,9 @@ class Users(db.Model):
     # Define relationship to PostCommentLikes model
     comment_likes = db.relationship("PostCommentLikes", back_populates="user", cascade="all, delete-orphan")
 
+    # Define relationship to BlockedUsers model
+    blocked_users = db.relationship("BlockedUsers", foreign_keys="[BlockedUsers.blocker_id]", back_populates="blocker", cascade="all, delete-orphan", uselist=True)
+
     def __repr__(self):
         return f"<User {self.private_user_id}>"
 
