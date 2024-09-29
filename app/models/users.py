@@ -6,7 +6,7 @@ from sqlalchemy import Enum
 import enum
 
 
-class UserProfileAccessories(db.Model):
+class UserProfileAccessories(db.Model): # type: ignore
     __tablename__ = "user_profile_accessories"
 
     user_id = db.Column(
@@ -49,7 +49,7 @@ class UserProfileAccessories(db.Model):
     )
 
 
-class UserStats(db.Model):
+class UserStats(db.Model): # type: ignore
     __tablename__ = "user_stats"
     user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
     follower_count = db.Column(db.Integer, nullable=False)
@@ -63,7 +63,7 @@ class UserStats(db.Model):
         return f"<UserStats {self.user_id}>"
 
 
-class Users(db.Model):
+class Users(db.Model): # type: ignore
     class UserType(enum.Enum):
         user = "user"
         admin = "admin"
@@ -121,7 +121,7 @@ class Users(db.Model):
     def __repr__(self):
         return f"<User {self.private_user_id}>"
 
-    def as_dict(self):
+    def to_dict(self):
         user_stats = self.stats or {}
         active_profile_accessories = self.active_profile_accessories
 

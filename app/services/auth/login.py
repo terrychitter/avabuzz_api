@@ -34,9 +34,9 @@ def login(login_data: Dict[str, str]) -> Tuple[Response, int]:
         ]
 
         # Validate the required fields
-        validation_error, status_code = validate_required_fields(login_data, required_fields)
-        if validation_error:
-            return validation_error, status_code
+        validation_message, status_code = validate_required_fields(login_data, required_fields)
+        if status_code != 200:
+            return validation_message, status_code
         
         # Check if the user exists
         user = Users.query.filter_by(email=login_data["email"]).first()

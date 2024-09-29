@@ -10,7 +10,7 @@ def get_me(private_user_id: str) -> Tuple[Response, int]:
             return jsonify({"error": "User not found"}), 404
         
         # Return the user data
-        return jsonify(user.as_dict()), 200
+        return jsonify(user.to_dict()), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

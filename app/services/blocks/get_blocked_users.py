@@ -30,7 +30,7 @@ def get_blocked_users(private_user_id: str) -> Tuple[Response, int]:
         blocked_users = BlockedUsers.query.filter_by(blocker_id=private_user_id).all()
 
         # Return the list of blocked users
-        return jsonify([blocked_user.as_dict() for blocked_user in blocked_users]), 200
+        return jsonify([blocked_user.to_dict() for blocked_user in blocked_users]), 200
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500

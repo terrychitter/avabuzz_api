@@ -2,7 +2,7 @@ from flask import Response, jsonify
 from typing import Optional, Tuple
 from app.models import HashTags
 
-def get_hashtag_posts(hashtag_name: Optional[str]) -> Tuple[Response, int]:
+def get_hashtag_posts(hashtag_name: str) -> Tuple[Response, int]:
     """
     Fetches posts associated with a specific hashtag.
 

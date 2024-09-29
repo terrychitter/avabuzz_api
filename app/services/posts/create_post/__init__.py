@@ -55,9 +55,9 @@ def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
         ]
         
         # Validate required fields
-        validation_error, status_code = validate_required_fields(post_data, required_conditions)
-        if validation_error:
-            return validation_error, status_code
+        validation_message, status_code = validate_required_fields(post_data, required_conditions)
+        if status_code != 200:
+            return validation_message, status_code
         
         # Check if the user exists
         user = Users.query.get(private_user_id)

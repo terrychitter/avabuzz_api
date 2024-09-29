@@ -1,5 +1,5 @@
 from typing import Tuple
-from flask import Response
+from flask import Response, jsonify
 from app.models import Users, UserFollowers, UserStats
 from app import db
 
@@ -22,20 +22,20 @@ def follow_user(follower_private_user_id: str, followee_public_user_id: str) -> 
     # Check if the follower exists in the database
     follower = Users.query.filter_by(private_user_id=follower_private_user_id).first()
     if not follower:
-        return {"message": "Follower not found"}, 404
+        return jsonify({"message": "Follower not found"}), 404
     
     # Check if the followee exists in the database
     followee = Users.query.filter_by(public_user_id=followee_public_user_id).first()
     if not followee:
-        return {"message": "Followee not found"}, 404
+        return jsonify({"message": "Followee not found"}), 404
     
     # Ensure the follower is not following themselves
     if follower.private_user_id == followee.private_user_id:
-        return {"message": "Follower cannot follow themselves"}, 400
+        return jsonify({"message": "Follower cannot follow themselves"}), 400
     
     # Check if the follower is already following the followee
     if UserFollowers.query.filter_by(follower_user_id=follower.private_user_id, followee_user_id=followee.private_user_id).first():
-        return {"message": "Follower is already following this followee"}, 400
+        return jsonify({"message": "Follower is already following this followee"}), 400
     
     # Create a new UserFollowers object
     new_follow = UserFollowers(follower_user_id=follower.private_user_id, followee_user_id=followee.private_user_id)
@@ -49,10 +49,10 @@ def follow_user(follower_private_user_id: str, followee_public_user_id: str) -> 
         followee.stats.follower_count += 1
 
         db.session.commit()
-        return {"message": "User followed successfully"}, 200
+        return jsonify({"message": "User followed successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        return {"message": "An error occurred while following the user", "error": str(e)}, 500
+        return jsonify({"message": "An error occurred while following the user", "error": str(e)}), 500
     
 
     

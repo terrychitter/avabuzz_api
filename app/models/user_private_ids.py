@@ -1,7 +1,7 @@
 from app import db
 
 
-class UserPrivateId(db.Model):
+class UserPrivateId(db.Model): # type: ignore
     """
     This class represents the user_private_ids table and is used to store private ids that have been generated.
     """

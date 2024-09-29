@@ -1,9 +1,9 @@
-from typing import Type, Dict, Optional
+from typing import Type, Dict, Optional, Any
 from sqlalchemy.orm import Query
 from sqlalchemy.exc import SQLAlchemyError
 from app import db
 
-def value_exists(table, field_name: str, value: str, exclude_record: Optional[Dict[str, any]] = None) -> bool:
+def value_exists(table, field_name: str, value: str, exclude_record: Optional[Dict[str, Any]] = None) -> bool:
     """
     Check if a given value exists in a specified field of a SQLAlchemy model table, optionally excluding specific records.
 

@@ -1,11 +1,12 @@
 import random
 import string
 import uuid
-from sqlalchemy.orm import Session
+from typing import Optional
+from sqlalchemy.orm import scoped_session
 from app.models.user_public_ids import UserPublicId
 from app.models.user_private_ids import UserPrivateId
 
-def generate_unique_public_id(session) -> str:
+def generate_unique_public_id(session: scoped_session) -> str:
     """
     Generates a unique public id for a user. It will check if the generated public ID already exists in the database.
     NOTE: This will not add the generated public id to the database. This is the responsibility of the caller.
@@ -29,7 +30,7 @@ def generate_unique_public_id(session) -> str:
         if not existing_id:
             return random_id
         
-def generate_unique_private_id(session: Session) -> str:
+def generate_unique_private_id(session: scoped_session) -> str:
     """
     Generates a unique private ID for a user. It will check if the generated private ID already exists in the database.
     NOTE: This will not add the generated private ID to the database. This is the responsibility of the caller.
@@ -47,7 +48,7 @@ def generate_unique_private_id(session: Session) -> str:
         random_id: str = ''.join(random.choice(letters + numbers) for _ in range(10))
         
         # Check if the generated ID already exists in the database
-        existing_id: UserPrivateId = session.query(UserPrivateId).filter_by(private_id=random_id).first()
+        existing_id: Optional[UserPrivateId] = session.query(UserPrivateId).filter_by(private_id=random_id).first()
         
         if not existing_id:
             return random_id

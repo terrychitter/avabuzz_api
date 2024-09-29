@@ -2,7 +2,7 @@ import datetime
 from app import db
 from app.utils.id_generation import generate_uuid
 
-class UserFollowers(db.Model):
+class UserFollowers(db.Model): # type: ignore
     __tablename__ = "user_followers"
 
     follow_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
@@ -20,8 +20,8 @@ class UserFollowers(db.Model):
     def to_dict(self,exclude_fields: list= []):
         data = {
             "follow_id": self.follow_id,
-            "follower": self.follower.as_dict(),
-            "followee": self.followee.as_dict(),
+            "follower": self.follower.to_dict(),
+            "followee": self.followee.to_dict(),
             "followed_at": self.followed_at
         }
     

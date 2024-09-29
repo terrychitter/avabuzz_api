@@ -34,9 +34,9 @@ def comment_on_post(private_user_id: str, post_id: int, comment_data: dict) -> T
             {"fields": ["content"], "message": "'content' is required in the comment data."}
         ]
 
-        validation_error, status_code = validate_required_fields(comment_data, required_fields)
-        if validation_error:
-            return validation_error, status_code
+        validation_message, status_code = validate_required_fields(comment_data, required_fields)
+        if status_code != 200:
+            return validation_message, status_code
         
         # Check if the user exists
         user = Users.query.get(private_user_id)

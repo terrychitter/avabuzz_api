@@ -1,7 +1,7 @@
 import datetime
 from app import db
 
-class UserGroups(db.Model):
+class UserGroups(db.Model): # type: ignore
     __tablename__ = "user_groups"
 
     private_group_id = db.Column(db.Integer, primary_key=True)
@@ -20,11 +20,11 @@ class UserGroups(db.Model):
     def __repr__(self):
         return f"<UserGroup {self.private_group_id}>"
     
-    def as_dict(self):
+    def to_dict(self):
         return {
             "public_id": self.public_group_id,
             "private_id": self.private_group_id,
-            "owner": self.owner.as_dict(),
+            "owner": self.owner.to_dict(),
             "created_at": self.created_at,
             "name": self.group_name,
             "description": self.group_description

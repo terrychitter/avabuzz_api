@@ -1,7 +1,7 @@
 from app import db
 
 
-class UserPublicId(db.Model):
+class UserPublicId(db.Model): # type: ignore
     """
     This class represents the user_public_id_sequence table and is used to store public ids that have been generated.
     """

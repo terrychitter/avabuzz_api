@@ -2,7 +2,7 @@ from app import db
 from app.models.profile_accessories import ProfileAccessories
 from app.utils.id_generation import generate_uuid
 
-class OwnedAccessories(db.Model):
+class OwnedAccessories(db.Model): # type: ignore
     __tablename__ = "owned_accessories"
 
     owned_accessory_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)

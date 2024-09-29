@@ -32,13 +32,13 @@ def get_users(public_user_id: Optional[str] = None) -> Tuple[Response, int]:
             return jsonify({"message": "User not found"}), 404
 
         # Return the user as JSON
-        return jsonify(user.as_dict()), 200
+        return jsonify(user.to_dict()), 200
     else:
         # Query all the users from the database
         users = Users.query.all()
 
         # Convert the users to a list of dictionaries
-        users_list = [user.as_dict() for user in users]
+        users_list = [user.to_dict() for user in users]
 
         # Return the list of users as JSON
         return jsonify(users_list), 200

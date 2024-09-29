@@ -3,7 +3,7 @@ from app import db
 from app.utils.id_generation import generate_uuid
 
 
-class JWTTokenBlocklist(db.Model):
+class JWTTokenBlocklist(db.Model): # type: ignore
     __tablename__ = "jwt_token_blocklist"
 
     jwt_token_blocklist_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)

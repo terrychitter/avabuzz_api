@@ -31,7 +31,7 @@ def get_hashtags(hashtag_name: Optional[str] = None) -> Tuple[Response, int]:
             hashtag = HashTags.query.filter_by(hashtag_name=hashtag_name).first()
             if hashtag:
                 # Return the hashtag
-                return jsonify({"hashtag": hashtag.as_dict()}), 200
+                return jsonify({"hashtag": hashtag.to_dict()}), 200
             else:
                 # Return a 404 response if the hashtag is not found
                 return jsonify({"error": "Hashtag not found"}), 404
@@ -39,6 +39,6 @@ def get_hashtags(hashtag_name: Optional[str] = None) -> Tuple[Response, int]:
             # Fetch all hashtags from the database
             hashtags = HashTags.query.all()
             # Return a list of all hashtags
-            return jsonify({"hashtags": [hashtag.as_dict() for hashtag in hashtags]}), 200
+            return jsonify({"hashtags": [hashtag.to_dict() for hashtag in hashtags]}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

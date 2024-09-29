@@ -1,9 +1,9 @@
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 from flask import Response, jsonify
 
 # ----------------- VALIDATE REQUIRED FIELDS ----------------- #
-def validate_required_fields(data: dict, required_fields: List[Dict[str, any]]) -> Tuple[Response, int]:
+def validate_required_fields(data: dict, required_fields: List[Dict[str, Any]]) -> Tuple[Response, int]:
     """
     Validates that the required fields are present based on the provided conditions.
     Supports mutual exclusivity where specified.
@@ -32,7 +32,7 @@ def validate_required_fields(data: dict, required_fields: List[Dict[str, any]]) 
             if not any(field in data and data[field] for field in fields):
                 return jsonify({"message": condition["message"]}), 400
 
-    return None, None
+    return jsonify({"message": "Validation passed"}), 200
 
 # ----------------- VALIDATE EMAIL ----------------- #
 def valid_email(email: str) -> bool:

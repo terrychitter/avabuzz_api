@@ -157,6 +157,6 @@ def create_user(user_data: dict) -> Tuple[Response, int]:
         return jsonify({"message": "Error creating user", "error": str(e)}), 500
 
     # Return a success response with the created user details
-    return jsonify({"message": "User created successfully", "user": new_user.as_dict()}), 201
+    return jsonify({"message": "User created successfully", "user": new_user.to_dict()}), 201
 
 

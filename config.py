@@ -13,11 +13,11 @@ class Config:
     API_KEY = os.getenv("API_KEY")
 
     # Flask-SQLAlchemy configuration
-    SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_URI", "sqlite:///default.db")
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
     # JWT configuration
-    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your_default_jwt_secret_key")
     JWT_ACCESS_TOKEN_EXPIRES = 900  # 15 minutes
     JWT_REFRESH_TOKEN_EXPIRES: int = 2592000 # 30 days
     JWT_BLACKLIST_ENABLED: bool = True

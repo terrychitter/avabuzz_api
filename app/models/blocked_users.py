@@ -2,7 +2,7 @@ from app import db
 from datetime import datetime
 from app.utils.id_generation import generate_uuid
 
-class BlockedUsers(db.Model):
+class BlockedUsers(db.Model): # type: ignore
     __tablename__ = "blocked_users"
 
     blocked_users_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -17,11 +17,11 @@ class BlockedUsers(db.Model):
     def __repr__(self):
         return f"<BlockedUsers {self.blocked_users_id}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "blocked_users_id": self.blocked_users_id,
-            "blocker": self.blocker.as_dict(),
-            "blocked_id": self.blocked.as_dict(),
+            "blocker": self.blocker.to_dict(),
+            "blocked_id": self.blocked.to_dict(),
             "blocked_at": self.blocked_at
         }
     

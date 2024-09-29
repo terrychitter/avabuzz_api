@@ -1,7 +1,7 @@
 from app import db
 from app.utils.id_generation import generate_uuid
 
-class HashTags(db.Model):
+class HashTags(db.Model): # type: ignore
     __tablename__ = "hashtags"
 
     hashtag_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -15,7 +15,7 @@ class HashTags(db.Model):
     def __repr__(self):
         return f"<HashTag {self.hashtag_id}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "hashtag_id": self.hashtag_id,
             "hashtag_name": self.hashtag_name,

@@ -4,7 +4,7 @@ from enum import Enum
 from app.utils.id_generation import generate_uuid
 from sqlalchemy import Enum as SQLAlchemyEnum
 
-class PostCategories(db.Model):
+class PostCategories(db.Model): # type: ignore
     __tablename__ = "post_categories"
 
     post_category_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -17,14 +17,14 @@ class PostCategories(db.Model):
     def __repr__(self):
         return f"<PostCategory {self.post_category_id}>"
     
-    def as_dict(self):
+    def to_dict(self):
         return {
             "id": self.post_category_id,
             "name": self.post_category_name,
             "description": self.post_category_description
         }
 
-class PostHashTags(db.Model):
+class PostHashTags(db.Model): # type: ignore
     __tablename__ = "post_hashtags"
 
     post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
@@ -36,13 +36,13 @@ class PostHashTags(db.Model):
     def __repr__(self):
         return f"<PostHashTag {self.post_id}-{self.hashtag_id}>"
     
-    def as_dict(self):
+    def to_dict(self):
         return {
             "post_id": self.post_id,
             "hashtag_id": self.hashtag_id
         }
 
-class PostMedia(db.Model):
+class PostMedia(db.Model): # type: ignore
     __tablename__ = "post_media"
 
     post_media_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
@@ -58,14 +58,14 @@ class PostMedia(db.Model):
     def __repr__(self):
         return f"<PostMedia {self.post_media_id}>"
     
-    def as_dict(self):
+    def to_dict(self):
         return {
             "url": self.media_url,
             "order": self.media_order,
             "size_bytes": self.media_size_bytes,
         }
 
-class PostReactionTypes(db.Model):
+class PostReactionTypes(db.Model): # type: ignore
     __tablename__ = "post_reaction_types"
 
     post_reaction_type = db.Column(db.String(20), primary_key=True)
@@ -78,7 +78,7 @@ class PostReactionTypes(db.Model):
             "type": self.post_reaction_type
         }
 
-class PostReactionCounts(db.Model):
+class PostReactionCounts(db.Model): # type: ignore
     __tablename__ = "post_reaction_counts"
 
     post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
@@ -88,7 +88,7 @@ class PostReactionCounts(db.Model):
     def __repr__(self):
         return f"<PostReactionCount {self.post_id}-{self.post_reaction_type}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "post_id": self.post_id,
             "type": self.post_reaction_type,
@@ -100,7 +100,7 @@ class PostReactionCounts(db.Model):
         
         return data
     
-class PostReactions(db.Model):
+class PostReactions(db.Model): # type: ignore
     __tablename__ = "post_reactions"
 
     post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
@@ -116,7 +116,7 @@ class PostReactions(db.Model):
     def __repr__(self):
         return f"<PostReaction {self.post_id}-{self.user_id}-{self.post_reaction_type}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "post_id": self.post_id,
             "user_id": self.user_id,
@@ -128,7 +128,7 @@ class PostReactions(db.Model):
         
         return data
 
-class PostComments(db.Model):
+class PostComments(db.Model): # type: ignore
     __tablename__ = "post_comments"
 
     class CommentStatus(Enum):
@@ -162,17 +162,20 @@ class PostComments(db.Model):
     def __repr__(self):
         return f"<PostComment {self.post_comment_id}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
+        # Access the actual like_count list by using self.__dict__ to bypass the RelationshipProperty
+        like_count_relationship = getattr(self, "like_count", [])
+        
         data = {
             "id": self.post_comment_id,
             "post_id": self.post_id,
-            "user": self.user.as_dict(),
+            "user": self.user.to_dict(),
             "text": self.post_comment_text,
             "status": self.post_comment_status.value,
-            "like_count": self.like_count[0].post_comment_like_count if self.like_count else 0,
+            "like_count": like_count_relationship[0].post_comment_like_count if like_count_relationship and len(like_count_relationship) > 0 else 0,
             "parent_post_comment_id": self.parent_post_comment_id,
             "created_at": self.created_at,
-            "replies": [reply.as_dict() for reply in self.replies] if "replies" not in exclude_fields else []
+            "replies": [reply.to_dict() for reply in self.replies] if "replies" not in exclude_fields else []
         }
 
         for field in exclude_fields:
@@ -180,7 +183,7 @@ class PostComments(db.Model):
         
         return data
 
-class PostCommentLikes(db.Model):
+class PostCommentLikes(db.Model): # type: ignore
     __tablename__ = "post_comment_likes"
 
     post_comment_like_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
@@ -197,11 +200,11 @@ class PostCommentLikes(db.Model):
     def __repr__(self):
         return f"<PostCommentLike {self.post_comment_like_id}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "id": self.post_comment_like_id,
             "comment_id": self.post_comment_id,
-            "user": self.user.as_dict(),
+            "user": self.user.to_dict(),
             "created_at": self.created_at
         }
 
@@ -210,7 +213,7 @@ class PostCommentLikes(db.Model):
         
         return data
 
-class PostCommentLikeCounts(db.Model):
+class PostCommentLikeCounts(db.Model): # type: ignore
     __tablename__ = "post_comment_like_counts"
 
     post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
@@ -222,7 +225,7 @@ class PostCommentLikeCounts(db.Model):
     def __repr__(self):
         return f"<PostCommentLikeCount {self.post_comment_id}>"
     
-    def as_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list = []):
         data = {
             "comment_id": self.post_comment_id,
             "like_count": self.post_comment_like_count
@@ -233,7 +236,7 @@ class PostCommentLikeCounts(db.Model):
         
         return data
 
-class Posts(db.Model):
+class Posts(db.Model): # type: ignore
     __tablename__ = "posts"
 
     class PostType(Enum):
@@ -282,22 +285,28 @@ class Posts(db.Model):
         return f"<Post {self.post_id}>"
     
     def to_dict(self, user_id=None, exclude_fields: list = ["user_reacted"]):
+        # Access the actual relationships by using getattr to avoid issues with RelationshipProperty
+        post_hashtags_relationship = getattr(self, "post_hashtags", [])
+        media_relationship = getattr(self, "media", [])
+        reactions_relationship = getattr(self, "reactions", [])
+        post_reactions_relationship = getattr(self, "post_reactions", [])
+        
         data = {
             "id": self.post_id,
             "caption": self.post_caption,
             "type": self.post_type.value,
-            "category": self.post_category.as_dict(),
+            "category": self.post_category.to_dict(),
             "view_count": self.view_count,
-            "poster": self.user.as_dict(),
+            "poster": self.user.to_dict(),
             "created_at": self.created_at,
-            "hashtags": [tag.hashtag.as_dict()["hashtag_name"] for tag in self.post_hashtags],
-            "media": [media.as_dict() for media in self.media],
-            "reactions": [reaction.as_dict(exclude_fields=["post_id"]) for reaction in self.reactions],
+            "hashtags": [tag.hashtag.to_dict()["hashtag_name"] for tag in post_hashtags_relationship],
+            "media": [media.to_dict() for media in media_relationship],
+            "reactions": [reaction.to_dict(exclude_fields=["post_id"]) for reaction in reactions_relationship],
         }
         
         # Check if user_id is provided, to fetch their reaction
         if user_id:
-            user_reaction = next((reaction for reaction in self.post_reactions if reaction.user_id == user_id), None)
+            user_reaction = next((reaction for reaction in post_reactions_relationship if reaction.user_id == user_id), None)
             data["user_reacted"] = bool(user_reaction)  # True if user has reacted, False otherwise
             data["user_reaction_type"] = user_reaction.post_reaction_type if user_reaction else None
 

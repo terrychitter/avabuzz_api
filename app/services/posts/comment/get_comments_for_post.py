@@ -30,6 +30,6 @@ def get_comments_for_post(post_id: int) -> Tuple[Response, int]:
         # Get the comments associated with the post
         comments = PostComments.query.filter_by(post_id=post_id, parent_post_comment_id=None).all()
 
-        return jsonify([comment.as_dict(exclude_fields=["post_id"]) for comment in comments]), 200
+        return jsonify([comment.to_dict(exclude_fields=["post_id"]) for comment in comments]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
