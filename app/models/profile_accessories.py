@@ -1,10 +1,11 @@
 from app import db
+from app.utils.id_generation import generate_uuid
 
 
 class ProfileAccessories(db.Model):
     __tablename__ = "profile_accessories"
 
-    accessory_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    accessory_id = db.Column(db.String, primary_key=True, default=generate_uuid)
     accessory_name = db.Column(db.String(50), nullable=False)
     accessory_description = db.Column(db.Text, nullable=False)
     media_url = db.Column(db.String(255), nullable=False)

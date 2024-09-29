@@ -1,5 +1,6 @@
 import random
 import string
+import uuid
 from sqlalchemy.orm import Session
 from app.models.user_public_ids import UserPublicId
 from app.models.user_private_ids import UserPrivateId
@@ -50,4 +51,13 @@ def generate_unique_private_id(session: Session) -> str:
         
         if not existing_id:
             return random_id
+
+def generate_uuid() -> str:
+    """
+    Generates a UUID. Example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+
+    Returns:
+        str: A UUID.
+    """
+    return str(uuid.uuid4())
         

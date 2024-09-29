@@ -1,12 +1,13 @@
 import datetime
 from app import db
 from enum import Enum
+from app.utils.id_generation import generate_uuid
 from sqlalchemy import Enum as SQLAlchemyEnum
 
 class PostCategories(db.Model):
     __tablename__ = "post_categories"
 
-    post_category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_category_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     post_category_name = db.Column(db.String(50), nullable=False)
     post_category_description = db.Column(db.Text, nullable=True)
 
@@ -26,8 +27,8 @@ class PostCategories(db.Model):
 class PostHashTags(db.Model):
     __tablename__ = "post_hashtags"
 
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), primary_key=True)
-    hashtag_id = db.Column(db.Integer, db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
+    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
+    hashtag_id = db.Column(db.String(36), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
 
     # Define relationship to HashTags model
     hashtag = db.relationship("HashTags", backref="post_hashtag")
@@ -44,8 +45,8 @@ class PostHashTags(db.Model):
 class PostMedia(db.Model):
     __tablename__ = "post_media"
 
-    post_media_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), nullable=False)
+    post_media_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
+    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
     media_url = db.Column(db.String(255), nullable=False)
     media_size_bytes = db.Column(db.Integer, nullable=False)
     media_order = db.Column(db.Integer, nullable=False)
@@ -80,7 +81,7 @@ class PostReactionTypes(db.Model):
 class PostReactionCounts(db.Model):
     __tablename__ = "post_reaction_counts"
 
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), primary_key=True)
+    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
     post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
     reaction_count = db.Column(db.Integer, nullable=False, default=0)
 
@@ -102,7 +103,7 @@ class PostReactionCounts(db.Model):
 class PostReactions(db.Model):
     __tablename__ = "post_reactions"
 
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), primary_key=True)
+    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
     user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
     post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
 
@@ -135,8 +136,8 @@ class PostComments(db.Model):
         HIDDEN = "HIDDEN"
         FLAGGED = "FLAGGED"
 
-    post_comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.post_id"), nullable=False)
+    post_comment_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
     user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     post_comment_text = db.Column(db.Text, nullable=False)
     post_comment_status = db.Column(SQLAlchemyEnum(CommentStatus), nullable=False, default=CommentStatus.NORMAL)
@@ -178,10 +179,11 @@ class PostComments(db.Model):
             data.pop(field, None)
         
         return data
+
 class PostCommentLikes(db.Model):
     __tablename__ = "post_comment_likes"
 
-    post_comment_like_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_comment_like_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=False)
     user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
@@ -240,7 +242,7 @@ class Posts(db.Model):
         video = "video"
         event= "event"
 
-    post_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     post_caption = db.Column(db.Text, nullable=True)
     post_type = db.Column(SQLAlchemyEnum(PostType), nullable=False)
     post_category_id = db.Column(db.Integer, db.ForeignKey("post_categories.post_category_id"), nullable=False)

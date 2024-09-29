@@ -137,7 +137,7 @@ def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
         return jsonify({"message": "Post created successfully", "post": new_post.to_dict()}), 201
 
     except Exception as e:
-        db.session.rollback()  # Rollback in case of any error
+        db.session.rollback()
         return jsonify({"message": "An error occurred while creating the post", "error": str(e)}), 500
 
 

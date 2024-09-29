@@ -41,11 +41,11 @@ def login(login_data: Dict[str, str]) -> Tuple[Response, int]:
         # Check if the user exists
         user = Users.query.filter_by(email=login_data["email"]).first()
         if not user:
-            return jsonify({"message": "Incorrect email or password."}), 404
+            return jsonify({"message": "Incorrect email or password."}), 401
         
         # Check if the password matches
         if not check_password_hash(user.password_hash, login_data["password"]):
-            return jsonify({"message": "Incorrect email or password."}), 400 
+            return jsonify({"message": "Incorrect email or password."}), 401 
         
         # Generate a JWT token
         access_token = create_access_token(identity=user.private_user_id)

@@ -1,10 +1,11 @@
 import datetime
 from app import db
+from app.utils.id_generation import generate_uuid
 
 class UserFollowers(db.Model):
     __tablename__ = "user_followers"
 
-    follow_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    follow_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
     follower_user_id = db.Column(db.Integer, db.ForeignKey("users.private_user_id"), nullable=False)
     followee_user_id = db.Column(db.Integer, db.ForeignKey("users.private_user_id"), nullable=False)
     followed_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())

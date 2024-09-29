@@ -1,10 +1,11 @@
-from datetime import datetime
 from app import db
+from datetime import datetime
+from app.utils.id_generation import generate_uuid
 
 class BlockedUsers(db.Model):
     __tablename__ = "blocked_users"
 
-    blocked_users_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    blocked_users_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     blocker_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     blocked_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     blocked_at = db.Column(db.DateTime, nullable=False, default=datetime.now())

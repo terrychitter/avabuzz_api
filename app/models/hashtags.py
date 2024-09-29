@@ -1,9 +1,10 @@
 from app import db
+from app.utils.id_generation import generate_uuid
 
 class HashTags(db.Model):
     __tablename__ = "hashtags"
 
-    hashtag_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    hashtag_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     hashtag_name = db.Column(db.String(50), nullable=False)
     views = db.Column(db.Integer, default=0)
     post_count = db.Column(db.Integer, default=0)

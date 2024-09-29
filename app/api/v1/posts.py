@@ -31,7 +31,7 @@ def get_posts():
         return get_posts_service(None, None)
 
 # ----------------- GET POST BY ID ----------------- #
-@bp.route("/posts/<int:post_id>", methods=["GET"])
+@bp.route("/posts/<string:post_id>", methods=["GET"])
 @api_key_required
 def get_post_by_id(post_id):
     try:
@@ -54,7 +54,7 @@ def create_post():
     return create_post_service(private_user_id, post_data)
 
 # ----------------- DELETE POST ----------------- #
-@bp.route("/posts/<int:post_id>", methods=["DELETE"])
+@bp.route("/posts/<string:post_id>", methods=["DELETE"])
 @api_key_required
 @jwt_required()
 def delete_post(post_id):
@@ -69,7 +69,7 @@ def get_posts_by_user(public_user_id):
     return get_posts_for_user_service(public_user_id)
 
 # ----------------- REACT TO POST ----------------- #
-@bp.route("/posts/<int:post_id>/react/<string:reaction>", methods=["POST"])
+@bp.route("/posts/<string:post_id>/react/<string:reaction>", methods=["POST"])
 @api_key_required
 @jwt_required()
 def react_to_post(post_id, reaction):
@@ -78,7 +78,7 @@ def react_to_post(post_id, reaction):
     return react_to_post_service(private_user_id, post_id, reaction)
 
 # ----------------- UNREACT TO POST ----------------- #
-@bp.route("/posts/<int:post_id>/react", methods=["DELETE"])
+@bp.route("/posts/<string:post_id>/react", methods=["DELETE"])
 @api_key_required
 @jwt_required()
 def unreact_to_post(post_id):
@@ -87,14 +87,14 @@ def unreact_to_post(post_id):
     return unreact_to_post_service(private_user_id, post_id)
 
 # ----------------- GET POST COMMENTS ----------------- #
-@bp.route("/posts/<int:post_id>/comments", methods=["GET"])
+@bp.route("/posts/<string:post_id>/comments", methods=["GET"])
 @api_key_required
 def get_post_comments(post_id):
     return get_post_comments_service(post_id)
 
 
 # ----------------- COMMENT ON POST ----------------- #
-@bp.route("/posts/<int:post_id>/comments", methods=["POST"])
+@bp.route("/posts/<string:post_id>/comments", methods=["POST"])
 @api_key_required
 @jwt_required()
 def comment_on_post(post_id):
@@ -105,7 +105,7 @@ def comment_on_post(post_id):
     return comment_on_post_service(private_user_id, post_id, comment_data)
 
 # ----------------- DELETE COMMENT ----------------- #
-@bp.route("/posts/<int:post_id>/comments/<int:comment_id>", methods=["DELETE"])
+@bp.route("/posts/<string:post_id>/comments/<string:comment_id>", methods=["DELETE"])
 @api_key_required
 @jwt_required()
 def delete_comment(post_id, comment_id):
@@ -114,7 +114,7 @@ def delete_comment(post_id, comment_id):
     return delete_comment_service(private_user_id, post_id, comment_id)
 
 # ----------------- LIKE COMMENT ----------------- #
-@bp.route("/posts/<int:post_id>/comments/<int:comment_id>/like", methods=["POST"])
+@bp.route("/posts/<string:post_id>/comments/<string:comment_id>/like", methods=["POST"])
 @api_key_required
 @jwt_required()
 def like_comment(post_id, comment_id):
@@ -123,7 +123,7 @@ def like_comment(post_id, comment_id):
     return like_comment_service(private_user_id, post_id, comment_id)
 
 # ----------------- UNLIKE COMMENT ----------------- #
-@bp.route("/posts/<int:post_id>/comments/<int:comment_id>/like", methods=["DELETE"])
+@bp.route("/posts/<string:post_id>/comments/<string:comment_id>/like", methods=["DELETE"])
 @api_key_required
 @jwt_required()
 def unlike_comment(post_id, comment_id):

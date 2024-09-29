@@ -1,17 +1,17 @@
 from app import db
 from app.models.profile_accessories import ProfileAccessories
-
+from app.utils.id_generation import generate_uuid
 
 class OwnedAccessories(db.Model):
     __tablename__ = "owned_accessories"
 
-    owned_accessory_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    owned_accessory_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
     user_id = db.Column(
         db.String(10), db.ForeignKey("users.private_user_id"), nullable=True
     )
     created_at = db.Column(db.DateTime, nullable=False)
     accessory_id = db.Column(
-        db.Integer, db.ForeignKey("profile_accessories.accessory_id"), nullable=False
+        db.String(36), db.ForeignKey("profile_accessories.accessory_id"), nullable=False
     )
 
     # Define relationship to ProfileAccessories model
