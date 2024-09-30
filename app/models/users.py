@@ -7,8 +7,32 @@ import enum
 
 
 class UserProfileAccessories(db.Model): # type: ignore
+    """Represents the active profile accessories for a user account.
+
+    This model stores the active profile accessories for a user, including the active banner,
+    profile picture border, and badge.
+
+    Attributes:
+        user_id (str): The unique identifier for the user, serving as the primary key.
+        active_banner_id (int): The identifier for the active banner accessory, which cannot be null.
+        active_profile_picture_border_id (int): The identifier for the active profile picture border accessory, which cannot be null.
+        active_badge_id (int): The identifier for the active badge accessory, which cannot be null.
+    
+    Relationships:
+        user (Users): A relationship to the Users model, indicating the user associated with the active profile accessories.
+        active_banner (OwnedAccessories): A relationship to the OwnedAccessories model, indicating the active banner accessory.
+        active_profile_picture_border (OwnedAccessories): A relationship to the OwnedAccessories model, indicating the active profile picture border accessory.
+        active_badge (OwnedAccessories): A relationship to the OwnedAccessories model, indicating the active badge accessory.
+
+    Returns:
+        None
+    """
+
+    # TABLE NAME
     __tablename__ = "user_profile_accessories"
 
+
+    # COLUMNS
     user_id = db.Column(
         db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True
     )
@@ -48,9 +72,53 @@ class UserProfileAccessories(db.Model): # type: ignore
         back_populates="user_profile_accessories_badge",
     )
 
+    # METHODS
+    def __repr__(self):
+        return f"<UserProfileAccessories {self.user_id}>"
+    
+    def to_dict(self, exclude_fields: list = []):
+        """Converts the UserProfileAccessories instance into a dictionary representation.
+        
+        This method converts the UserProfileAccessories instance into a dictionary representation,
+        allowing for exclusion of specified fields.
+
+        Args:
+            exclude_fields (list): A list of fields to exclude from the dictionary representation.
+        
+        Returns:
+            dict: A dictionary representation of the UserProfileAccessories instance.
+        """
+        data = {
+            "active_banner": self.active_banner.to_dict(),
+            "active_profile_picture_border": self.active_profile_picture_border.to_dict(),
+            "active_badge": self.active_badge.to_dict()
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+
+        return data
+
 
 class UserStats(db.Model): # type: ignore
+    """Represents the statistics of a user account.
+
+    This model stores statistical information about a user, including the number of followers,
+    following, and posts made by the user.
+
+    Attributes:
+        user_id (str): The unique identifier for the user, serving as the primary key.
+        follower_count (int): The number of followers for the user, which cannot be null.
+        following_count (int): The number of users that the user is following, which cannot be null.
+        post_count (int): The number of posts created by the user, which cannot be null.
+    
+    Relationships:
+        user (Users): A relationship to the Users model, indicating the user associated with the statistics.
+    """
+    # TABLE NAME
     __tablename__ = "user_stats"
+
+    # COLUMNS
     user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
     follower_count = db.Column(db.Integer, nullable=False)
     following_count = db.Column(db.Integer, nullable=False)
@@ -59,11 +127,72 @@ class UserStats(db.Model): # type: ignore
     # Define relationship to Users model
     user = db.relationship("Users", back_populates="stats")
 
+    # METHODS
     def __repr__(self):
         return f"<UserStats {self.user_id}>"
+    
+    def to_dict(self, exclude_fields: list = []):
+        """Converts the UserStats instance into a dictionary representation.
+        
+        This method converts the UserStats instance into a dictionary representation,
+        allowing for exclusion of specified fields.
+
+        Args:
+            exclude_fields (list): A list of fields to exclude from the dictionary representation.
+        
+        Returns:
+            dict: A dictionary representation of the UserStats instance.
+        """
+        data = {
+            "follower_count": self.follower_count,
+            "following_count": self.following_count,
+            "post_count": self.post_count
+        }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+
+        return data
 
 
 class Users(db.Model): # type: ignore
+    """Represents a user account in the system.
+
+    This model stores essential information about users, including their 
+    personal details, account settings, and relationships with other users 
+    (e.g., followers, groups).
+
+    Attributes:
+        private_user_id (str): The unique identifier for the user, serving as the primary key. 
+        public_user_id (str): The public identifier for the user, which must be unique and cannot be null.
+        username (str): The username chosen by the user, which must be unique and cannot be null.
+        email (str): The email address of the user, which must be unique and cannot be null.
+        friend_code (str, optional): A unique code for adding friends, which can be null.
+        password_hash (str): The hashed password of the user, which cannot be null.
+        profile_picture_url (str, optional): A URL pointing to the user's profile picture, defaults to a placeholder image.
+        gender (str, optional): The gender of the user, which can be null.
+        country (str, optional): The country of the user, which can be null.
+        orientation (str, optional): The sexual orientation of the user, which can be null.
+        biography (str, optional): A brief biography about the user, which can be null.
+        user_type (UserType): The type of user (e.g., user, admin, moderator), which cannot be null and defaults to 'user'.
+        birthdate (date, optional): The birthdate of the user, which can be null.
+        created_at (datetime): The timestamp when the user account was created. Defaults to the current time.
+
+    Relationships:
+        stats (UserStats): A relationship to the UserStats model, indicating the user's statistics.
+        active_profile_accessories (UserProfileAccessories): A relationship to the UserProfileAccessories model, indicating the user's active profile accessories.
+        posts (Posts): A relationship to the Posts model, indicating the posts created by the user.
+        groups (UserGroups): A relationship to the UserGroups model, indicating the groups owned by the user.
+        followers (UserFollowers): A relationship to the UserFollowers model, indicating users following this user.
+        following (UserFollowers): A relationship to the UserFollowers model, indicating users that this user is following.
+        post_reactions (PostReactions): A relationship to the PostReactions model, indicating the user's reactions to posts.
+        comments (PostComments): A relationship to the PostComments model, indicating the comments made by the user.
+        comment_likes (PostCommentLikes): A relationship to the PostCommentLikes model, indicating the likes given by the user to comments.
+        blocked_users (BlockedUsers): A relationship to the BlockedUsers model, indicating users blocked by this user.
+
+    Returns:
+        None
+    """
     class UserType(enum.Enum):
         user = "user"
         admin = "admin"
@@ -121,7 +250,18 @@ class Users(db.Model): # type: ignore
     def __repr__(self):
         return f"<User {self.private_user_id}>"
 
-    def to_dict(self):
+    def to_dict(self, exclude_fields=[]):
+        """Converts the Users instance into a dictionary representation.
+
+        This method converts the Users instance into a dictionary representation,
+        allowing for exclusion of specified fields.
+
+        Args:
+            exclude_fields (list): A list of fields to exclude from the dictionary representation.
+
+        Returns:
+            dict: A dictionary representation of the Users instance.
+        """
         user_stats = self.stats or {}
         active_profile_accessories = self.active_profile_accessories
 
@@ -147,7 +287,7 @@ class Users(db.Model): # type: ignore
                 else None
             )
 
-        return {
+        data = {
             "public_user_id": self.public_user_id,
             "username": self.username,
             "email": self.email,
@@ -160,14 +300,15 @@ class Users(db.Model): # type: ignore
             "user_type": self.user_type.value,
             "birth_date": self.birthdate,
             "created_at": self.created_at,
-            "user_stats": {
-                "follower_count": user_stats.follower_count if user_stats else None,
-                "following_count": user_stats.following_count if user_stats else None,
-                "post_count": user_stats.post_count if user_stats else None,
-            },
+            "user_stats": user_stats.to_dict(),
             "active_accessories": {
                 "active_banner_url": active_banner_url,
                 "active_profile_picture_border_url": active_profile_picture_border_url,
                 "active_badge_url": active_badge_url,
             },
         }
+
+        for field in exclude_fields:
+            data.pop(field, None)
+        
+        return data
