@@ -1,6 +1,6 @@
-from flask import jsonify, Response
 from typing import Tuple
 from app.models import Users
+from flask import jsonify, Response
 
 def get_me(private_user_id: str) -> Tuple[Response, int]:
     try:

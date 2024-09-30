@@ -1,10 +1,8 @@
 from app import db
 from typing import Tuple
-from app.models.users import Users, UserStats
 from flask import jsonify, Response
-from app.models import PostCategories, PostMedia, Posts, PostHashTags, PostReactionCounts, PostReactionTypes
-from app.models.hashtags import HashTags
 from app.utils.validation_utils import validate_required_fields
+from app.models import Users, UserStats, HashTags, PostCategories, PostMedia, Posts, PostHashTags, PostReactionCounts, PostReactionTypes
 
 def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
     """
@@ -113,6 +111,7 @@ def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
                 db.session.add(media)
 
         # Add the hashtags to the post
+        # TODO: Ensure hashtags are one word and lowercase
         if "hashtags" in post_data:
             for hashtag in post_data["hashtags"]:
                 hashtag = hashtag.lower()

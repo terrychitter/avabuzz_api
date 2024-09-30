@@ -1,8 +1,7 @@
 from app import db
 from typing import Tuple
 from flask import jsonify, Response
-from app.models.posts import Posts
-from app.models.users import Users, UserStats
+from app.models import Users, Posts, UserStats
 
 
 def delete_post(private_user_id: str, post_id: int) -> Tuple[Response, int]:

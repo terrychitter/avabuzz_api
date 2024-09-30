@@ -1,7 +1,7 @@
 from typing import Tuple
 from flask import Response, jsonify
 from app import db
-from app.models import Users, BlockedUsers
+from app.models.user import Users, BlockedUsers
 
 def block_user(blocker_id: str, blocked_id: str) -> Tuple[Response, int]:
     """

@@ -2,14 +2,15 @@ import datetime
 from typing import Tuple, List
 from app import db
 from flask import Response, jsonify, request
-from app.models.users import Users, UserStats
-from app.models.user_public_ids import UserPublicId
-from app.models.user_private_ids import UserPrivateId
-from app.models.profile_accessories import ProfileAccessories
-from app.models.users import UserProfileAccessories
-from app.models.owned_accessories import OwnedAccessories
 from werkzeug.security import generate_password_hash
 from app.utils.id_generation import generate_unique_public_id, generate_unique_private_id
+from app.models import (Users,
+                        UserStats,
+                        UserPublicId,
+                        UserPrivateId,
+                        ProfileAccessories,
+                        UserProfileAccessories,
+                        OwnedAccessories)
 
 def get_default_accessories() -> List:
     return ProfileAccessories.query.filter_by(default_accessory=True, ownership_type="user").all()

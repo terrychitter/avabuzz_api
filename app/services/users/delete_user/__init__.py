@@ -1,8 +1,8 @@
+from app import db
 from flask import jsonify
 from typing import Tuple
 from flask import Response
-from app import db
-from app.models.users import Users
+from app.models import Users
 
 
 def delete_user(public_user_id: str) -> Tuple[Response, int] :

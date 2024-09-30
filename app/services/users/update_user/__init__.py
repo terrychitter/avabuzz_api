@@ -2,7 +2,7 @@ from typing import Tuple
 from flask import Response, jsonify
 from werkzeug.security import generate_password_hash
 from app import db
-from app.models.users import Users
+from app.models import Users
 from app.utils.db_utils import value_exists
 from app.utils.validation_utils import valid_email, valid_friend_code
 

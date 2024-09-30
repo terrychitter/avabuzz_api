@@ -1,0 +1,1 @@
+from app.models.misc.jwt_token_blocklist import JWTTokenBlocklist

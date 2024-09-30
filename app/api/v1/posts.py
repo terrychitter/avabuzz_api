@@ -6,7 +6,6 @@ from app.services.posts import (
     get_posts_service,
     create_post_service,
     delete_post_service,
-    get_posts_for_user_service,
     react_to_post_service,
     unreact_to_post_service,
     get_post_comments_service,
@@ -61,12 +60,6 @@ def delete_post(post_id):
     # Get the user's private_user_id from the JWT
     private_user_id = get_jwt_identity()
     return delete_post_service(private_user_id, post_id)
-
-# ----------------- GET POSTS BY PUBLIC_USER_ID ----------------- #
-@bp.route("/posts/<string:public_user_id>", methods=["GET"])
-@api_key_required
-def get_posts_by_user(public_user_id):
-    return get_posts_for_user_service(public_user_id)
 
 # ----------------- REACT TO POST ----------------- #
 @bp.route("/posts/<string:post_id>/react/<string:reaction>", methods=["POST"])

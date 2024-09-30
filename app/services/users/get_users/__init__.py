@@ -1,6 +1,6 @@
 from flask import jsonify, Response
 from typing import Optional, Tuple
-from app.models.users import Users
+from app.models import Users
 
 def get_users(public_user_id: Optional[str] = None) -> Tuple[Response, int]:
     """

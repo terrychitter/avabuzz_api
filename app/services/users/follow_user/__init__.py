@@ -1,7 +1,7 @@
+from app import db
 from typing import Tuple
 from flask import Response, jsonify
-from app.models import Users, UserFollowers, UserStats
-from app import db
+from app.models import Users, UserFollowers
 
 
 def follow_user(follower_private_user_id: str, followee_public_user_id: str) -> Tuple[Response, int]:

@@ -1,0 +1,1 @@
+from app.models.market.profile_accessories import ProfileAccessories

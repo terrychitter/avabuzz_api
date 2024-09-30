@@ -3,8 +3,6 @@ import string
 import uuid
 from typing import Optional
 from sqlalchemy.orm import scoped_session
-from app.models.user_public_ids import UserPublicId
-from app.models.user_private_ids import UserPrivateId
 
 def generate_unique_public_id(session: scoped_session) -> str:
     """
@@ -17,6 +15,7 @@ def generate_unique_public_id(session: scoped_session) -> str:
     Returns:
         str: A unique public ID.
     """
+    from app.models.user import UserPublicId
     letters = string.ascii_uppercase
     numbers = string.digits
     
@@ -41,6 +40,7 @@ def generate_unique_private_id(session: scoped_session) -> str:
     Returns:
         str: A unique private ID.
     """
+    from app.models import UserPrivateId
     letters = string.ascii_uppercase
     numbers = string.digits
     

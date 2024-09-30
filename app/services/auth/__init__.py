@@ -1,9 +1,8 @@
 import os
-from app.services.jwt import jwt
 from typing import Tuple
 from config import Config
 from functools import wraps
-from dotenv import load_dotenv
+from app.services.jwt import jwt
 from app.services.auth.login import login
 from app.services.auth.logout import logout
 from flask import Response, request, jsonify

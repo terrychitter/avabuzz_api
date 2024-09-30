@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 from flask import Response, jsonify
-from app.models.posts import Posts
+from app.models import Posts
 
 def get_posts(post_id: Optional[int], private_user_id: Optional[str]) -> Tuple[Response, int]:
     """

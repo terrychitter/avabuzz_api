@@ -2,6 +2,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import db
 from flask import Blueprint, request
 from app.services.auth import api_key_required
+from app.services.posts import get_posts_for_user_service
 from app.services.users import (
     create_user_service,
     get_users_service,
@@ -69,6 +70,12 @@ def delete_user(private_user_id):
     private_user_id = get_jwt_identity()
     
     return delete_user_service(private_user_id)
+
+# ----------------- GET POSTS BY PUBLIC_USER_ID ----------------- #
+@bp.route("users/<string:public_user_id>/posts", methods=["GET"])
+@api_key_required
+def get_posts_by_user(public_user_id):
+    return get_posts_for_user_service(public_user_id)
 
 # ----------------- GET USER FOLLOWERS ----------------- #
 @bp.route("/users/<string:public_user_id>/followers", methods=["GET"])

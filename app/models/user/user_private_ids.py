@@ -1,6 +1,5 @@
 from app import db
 
-
 class UserPrivateId(db.Model): # type: ignore
     """Represents a record of unique private identifiers for users.
     
