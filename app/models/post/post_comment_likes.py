@@ -1,5 +1,6 @@
+from enum import Enum
 from app import db
-import datetime
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
 
 class PostCommentLikes(db.Model): # type: ignore
@@ -23,13 +24,13 @@ class PostCommentLikes(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_comment_likes"
+    __tablename__: str = "post_comment_likes"
 
     # COLUMNS
-    post_comment_like_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=False)
-    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    post_comment_like_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_comment_id: int = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=False)
+    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define relationship to PostComments model
     comment = db.relationship("PostComments", back_populates="likes")
@@ -40,7 +41,14 @@ class PostCommentLikes(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostCommentLike {self.post_comment_like_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostCommentLikes model."""
+        ID = "id"
+        COMMENT_ID = "comment_id"
+        USER = "user"
+        CREATED_AT = "created_at"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the PostCommentLikes instance into a dictionary representation.
 
         This method converts the PostCommentLikes instance into a dictionary
@@ -52,14 +60,14 @@ class PostCommentLikes(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostCommentLikes instance.
         """
-        data = {
+        data: dict = {
             "id": self.post_comment_like_id,
-            "comment": self.comment.to_dict(),
+            "comment_id": self.post_comment_id,
             "user": self.user.to_dict(),
             "created_at": self.created_at
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

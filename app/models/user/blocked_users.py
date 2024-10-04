@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 from datetime import datetime
 from app.utils.id_generation import generate_uuid
@@ -26,13 +27,13 @@ class BlockedUsers(db.Model): # type: ignore
             `None`
     """
     # TABLE NAME
-    __tablename__ = "blocked_users"
+    __tablename__: str = "blocked_users"
 
     # COLUMNS
-    blocked_users_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    blocker_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    blocked_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    blocked_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    blocked_users_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    blocker_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    blocked_id: str= db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    blocked_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define the relationship between the BlockedUsers and Users models
     blocker = db.relationship("Users", foreign_keys=[blocker_id])
@@ -42,7 +43,14 @@ class BlockedUsers(db.Model): # type: ignore
     def __repr__(self):
         return f"<BlockedUsers {self.blocked_users_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the BlockedUsers model."""
+        ID = "id"
+        BLOCKER = "blocker"
+        BLOCKED = "blocked"
+        BLOCKED_AT = "blocked_at"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the BlockedUsers instance into a dictionary representation.
 
         This method converts the BlockedUsers instance into a dictionary
@@ -54,7 +62,7 @@ class BlockedUsers(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the BlockedUsers instance.
         """
-        data = {
+        data: dict = {
             "blocked_users_id": self.blocked_users_id,
             "blocker": self.blocker.to_dict(),
             "blocked": self.blocked.to_dict(),
@@ -62,6 +70,6 @@ class BlockedUsers(db.Model): # type: ignore
         }
     
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
     
         return data

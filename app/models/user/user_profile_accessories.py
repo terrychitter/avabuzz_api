@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class UserProfileAccessories(db.Model): # type: ignore
@@ -23,25 +24,25 @@ class UserProfileAccessories(db.Model): # type: ignore
     """
 
     # TABLE NAME
-    __tablename__ = "user_profile_accessories"
+    __tablename__: str = "user_profile_accessories"
 
 
     # COLUMNS
-    user_id = db.Column(
+    user_id: str = db.Column(
         db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True
     )
-    active_banner_id = db.Column(
-        db.Integer,
+    active_banner_id: str = db.Column(
+        db.String(36),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
-    active_profile_picture_border_id = db.Column(
-        db.Integer,
+    active_profile_picture_border_id: str = db.Column(
+        db.String(36),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
-    active_badge_id = db.Column(
-        db.Integer,
+    active_badge_id: str = db.Column(
+        db.String(36),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
@@ -70,7 +71,14 @@ class UserProfileAccessories(db.Model): # type: ignore
     def __repr__(self):
         return f"<UserProfileAccessories {self.user_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the UserProfileAccessories model."""
+        USER_ID = "user_id"
+        BANNER = "banner"
+        PROFILE_PICTURE_BORDER = "profile_picture_border"
+        BADGE = "badge"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []):
         """Converts the UserProfileAccessories instance into a dictionary representation.
         
         This method converts the UserProfileAccessories instance into a dictionary representation,
@@ -83,12 +91,13 @@ class UserProfileAccessories(db.Model): # type: ignore
             dict: A dictionary representation of the UserProfileAccessories instance.
         """
         data = {
-            "active_banner": self.active_banner.to_dict(),
-            "active_profile_picture_border": self.active_profile_picture_border.to_dict(),
-            "active_badge": self.active_badge.to_dict()
+            "user_id": self.user_id,
+            "banner": self.active_banner.to_dict(),
+            "profile_picture_border": self.active_profile_picture_border.to_dict(),
+            "badge": self.active_badge.to_dict()
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

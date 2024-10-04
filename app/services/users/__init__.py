@@ -134,19 +134,19 @@ def get_user_followers_service(public_user_id: str) -> Tuple[Response, int]:
     return get_user_followers(public_user_id)
 
 # ----------------- GET USER FOLLOWING ----------------- #
-def get_user_following_service(private_user_id: str) -> Tuple[Response, int]:
+def get_user_following_service(public_user_id: str) -> Tuple[Response, int]:
     """
     Retrieve the list of users that a user is following.
 
     Args:
-        private_user_id (str): The private user ID of the user whose following list is to be retrieved.
+        public_user_id (str): The public user ID of the user whose following list is to be retrieved.
 
     Returns:
         Tuple[Response, int]: A tuple containing the Flask response object and an HTTP status code.
             - 200 OK: If the following list is successfully retrieved.
-            - 404 Not Found: If the user with the specified private_user_id is not found.
+            - 404 Not Found: If the user with the specified public_user_id is not found.
     """
-    return get_user_following(private_user_id)
+    return get_user_following(public_user_id)
 
 # ----------------- FOLLOW USER ----------------- #
 def follow_user_service(follower_private_user_id: str, followee_public_user_id: str) -> Tuple[Response, int]:

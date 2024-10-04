@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class PostReactionTypes(db.Model): # type: ignore
@@ -14,16 +15,20 @@ class PostReactionTypes(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_reaction_types"
+    __tablename__: str = "post_reaction_types"
 
     # COLUMNS
-    post_reaction_type = db.Column(db.String(20), primary_key=True)
+    post_reaction_type: str = db.Column(db.String(20), primary_key=True)
 
     # METHODS
     def __repr__(self):
         return f"<PostReactionType {self.post_reaction_type}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostReactionTypes model."""
+        TYPE = "type"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """
         Converts the PostReactionTypes instance into a dictionary representation.
 
@@ -36,11 +41,11 @@ class PostReactionTypes(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostReactionTypes instance.
         """
-        data = {
+        data: dict = {
             "type": self.post_reaction_type
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

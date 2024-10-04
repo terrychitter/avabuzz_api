@@ -1,5 +1,6 @@
-import datetime
 from app import db
+from enum import Enum
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
 
 
@@ -32,20 +33,20 @@ class ProfileAccessories(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "profile_accessories"
+    __tablename__: str = "profile_accessories"
 
     # COLUMNS
-    accessory_id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    accessory_name = db.Column(db.String(50), nullable=False)
-    accessory_description = db.Column(db.Text, nullable=False)
-    media_url = db.Column(db.String(255), nullable=False)
-    profile_accessory_type = db.Column(db.String(50), nullable=False)
-    profile_type = db.Column(db.String(20), nullable=False)
-    ownership_type = db.Column(db.String(20), nullable=False)
-    available = db.Column(db.Boolean, nullable=False, default=True)
-    default_accessory = db.Column(db.Boolean, nullable=False, default=False)
-    owner_count = db.Column(db.Integer, nullable=False, default=0)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    accessory_id: str = db.Column(db.String, primary_key=True, default=generate_uuid)
+    accessory_name: str = db.Column(db.String(50), nullable=False)
+    accessory_description: str = db.Column(db.Text, nullable=False)
+    media_url: str = db.Column(db.String(255), nullable=False)
+    profile_accessory_type: str = db.Column(db.String(50), nullable=False)
+    profile_type: str = db.Column(db.String(20), nullable=False)
+    ownership_type: str = db.Column(db.String(20), nullable=False)
+    available: bool = db.Column(db.Boolean, nullable=False, default=True)
+    default_accessory: bool = db.Column(db.Boolean, nullable=False, default=False)
+    owner_count: int = db.Column(db.Integer, nullable=False, default=0)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # RELATIONSHIPS
     owned_accessories = db.relationship(
@@ -56,7 +57,21 @@ class ProfileAccessories(db.Model): # type: ignore
     def __repr__(self):
         return f"<ProfileAccessory {self.accessory_id}>"
     
-    def to_dict(self, exclude_fields: list = []) -> dict:
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the ProfileAccessories model."""
+        ID = "id"
+        NAME = "name"
+        DESCRIPTION = "description"
+        URL = "url"
+        ACCESSORY_TYPE = "accessory_type"
+        PROFILE_TYPE = "profile_type"
+        OWNERSHIP_TYPE = "ownership_type"
+        AVAILABLE = "available"
+        DEFAULT_ACCESSORY = "default_accessory"
+        OWNER_COUNT = "owner_count"
+        CREATED_AT = "created_at"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the ProfileAccessories instance into a dictionary representation.
 
         This method converts the ProfileAccessories instance into a dictionary
@@ -68,7 +83,7 @@ class ProfileAccessories(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the ProfileAccessories instance.
         """
-        data = {
+        data: dict = {
             "id": self.accessory_id,
             "name": self.accessory_name,
             "description": self.accessory_description,
@@ -83,6 +98,6 @@ class ProfileAccessories(db.Model): # type: ignore
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

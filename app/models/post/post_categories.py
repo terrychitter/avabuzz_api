@@ -1,5 +1,6 @@
 from app import db
 from app.utils.id_generation import generate_uuid
+from enum import Enum
 
 class PostCategories(db.Model): # type: ignore
     """Represents a record of post categories in the database.
@@ -19,12 +20,12 @@ class PostCategories(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_categories"
+    __tablename__: str = "post_categories"
 
     # COLUMNS
-    post_category_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_category_name = db.Column(db.String(50), nullable=False)
-    post_category_description = db.Column(db.Text, nullable=True)
+    post_category_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_category_name: str = db.Column(db.String(50), nullable=False)
+    post_category_description: str = db.Column(db.Text, nullable=True)
 
     # Define the relationship to the Posts model
     posts = db.relationship("Posts", back_populates="post_category")
@@ -33,7 +34,13 @@ class PostCategories(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostCategory {self.post_category_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostCategories model."""
+        ID = "id"
+        NAME = "name"
+        DESCRIPTION = "description"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """
         Converts the PostCategories instance into a dictionary representation.
 
@@ -46,11 +53,13 @@ class PostCategories(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostCategories instance.
         """
-        data = {
+        data: dict = {
             "id": self.post_category_id,
             "name": self.post_category_name,
             "description": self.post_category_description
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
+
+        return data

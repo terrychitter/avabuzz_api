@@ -114,7 +114,8 @@ def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:
         # TODO: Ensure hashtags are one word and lowercase
         if "hashtags" in post_data:
             for hashtag in post_data["hashtags"]:
-                hashtag = hashtag.lower()
+                hashtag = hashtag.lower().replace(" ", "")
+
                 # Check if the hashtag exists
                 hashtag_obj = HashTags.query.filter_by(hashtag_name=hashtag).first()
                 if not hashtag_obj:

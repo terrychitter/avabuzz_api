@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class UserStats(db.Model): # type: ignore
@@ -16,13 +17,13 @@ class UserStats(db.Model): # type: ignore
         user (Users): A relationship to the Users model, indicating the user associated with the statistics.
     """
     # TABLE NAME
-    __tablename__ = "user_stats"
+    __tablename__: str = "user_stats"
 
     # COLUMNS
-    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
-    follower_count = db.Column(db.Integer, nullable=False)
-    following_count = db.Column(db.Integer, nullable=False)
-    post_count = db.Column(db.Integer, nullable=False)
+    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
+    follower_count: int = db.Column(db.Integer, nullable=False)
+    following_count: int = db.Column(db.Integer, nullable=False)
+    post_count: int = db.Column(db.Integer, nullable=False)
 
     # Define relationship to Users model
     user = db.relationship("Users", back_populates="stats")
@@ -31,7 +32,14 @@ class UserStats(db.Model): # type: ignore
     def __repr__(self):
         return f"<UserStats {self.user_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the UserStats model."""
+        USER_ID = "user_id"
+        FOLLOWERS = "followers"
+        FOLLOWING = "following"
+        POSTS = "posts"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = [DictKeys.USER_ID]) -> dict:
         """Converts the UserStats instance into a dictionary representation.
         
         This method converts the UserStats instance into a dictionary representation,
@@ -43,13 +51,14 @@ class UserStats(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the UserStats instance.
         """
-        data = {
+        data: dict = {
+            "user_id": self.user_id,
             "follower_count": self.follower_count,
             "following_count": self.following_count,
             "post_count": self.post_count
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

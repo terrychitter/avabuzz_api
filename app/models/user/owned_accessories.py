@@ -1,5 +1,6 @@
-import datetime
+from enum import Enum
 from app import db
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
 
 class OwnedAccessories(db.Model): # type: ignore
@@ -32,15 +33,15 @@ class OwnedAccessories(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "owned_accessories"
+    __tablename__: str = "owned_accessories"
 
     # COLUMNS
-    owned_accessory_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
-    user_id = db.Column(
+    owned_accessory_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    user_id: str = db.Column(
         db.String(10), db.ForeignKey("users.private_user_id"), nullable=True
     )
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    accessory_id = db.Column(
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    accessory_id: str = db.Column(
         db.String(36), db.ForeignKey("profile_accessories.accessory_id"), nullable=False
     )
 
@@ -70,7 +71,14 @@ class OwnedAccessories(db.Model): # type: ignore
     def __repr__(self):
         return f"<OwnedAccessories {self.owned_accessory_id}>"
     
-    def to_dict(self, exclude_fields: list = []) -> dict:
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the OwnedAccessories model."""
+        ID = "id"
+        USER_ID = "user_id"
+        CREATED_AT = "created_at"
+        ACCESSORY = "accessory"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = [DictKeys.USER_ID]) -> dict:
         """Converts the OwnedAccessories instance into a dictionary representation.
 
         This method converts the OwnedAccessories instance into a dictionary
@@ -82,7 +90,7 @@ class OwnedAccessories(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the OwnedAccessories instance.
         """
-        data = {
+        data: dict = {
             "id": self.owned_accessory_id,
             "user_id": self.user_id,
             "created_at": self.created_at,
@@ -90,6 +98,6 @@ class OwnedAccessories(db.Model): # type: ignore
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

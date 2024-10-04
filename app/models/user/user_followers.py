@@ -1,5 +1,6 @@
-import datetime
+from enum import Enum
 from app import db
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
 
 class UserFollowers(db.Model): # type: ignore
@@ -25,13 +26,13 @@ class UserFollowers(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "user_followers"
+    __tablename__: str = "user_followers"
 
     # COLUMNS
-    follow_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
-    follower_user_id = db.Column(db.Integer, db.ForeignKey("users.private_user_id"), nullable=False)
-    followee_user_id = db.Column(db.Integer, db.ForeignKey("users.private_user_id"), nullable=False)
-    followed_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    follow_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    follower_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    followee_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    followed_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # RELATIONSHIPS
     follower = db.relationship("Users", foreign_keys=[follower_user_id])
@@ -41,7 +42,14 @@ class UserFollowers(db.Model): # type: ignore
     def __repr__(self):
         return f"<UserFollowers {self.id}>"
     
-    def to_dict(self, exclude_fields: list= []) -> dict:
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the UserFollowers model."""
+        ID = "id"
+        FOLLOWER = "follower"
+        FOLLOWEE = "followee"
+        FOLLOWED_AT = "followed_at"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the UserFollowers instance into a dictionary representation.
 
         This method converts the UserFollowers instance into a dictionary
@@ -53,14 +61,14 @@ class UserFollowers(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the UserFollowers instance.
         """
-        data = {
-            "follow_id": self.follow_id,
+        data: dict = {
+            "id": self.follow_id,
             "follower": self.follower.to_dict(),
             "followee": self.followee.to_dict(),
             "followed_at": self.followed_at
         }
     
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
     
         return data

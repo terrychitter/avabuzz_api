@@ -1,5 +1,6 @@
 from app import db
 from enum import Enum
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
 from sqlalchemy import Enum as SQLAlchemyEnum
 
@@ -29,7 +30,7 @@ class PostComments(db.Model): # type: ignore
         like_count (PostCommentLikeCounts): A relationship to the PostCommentLikeCounts model, indicating the like count on the comment.
     """
     # TABLE NAME
-    __tablename__ = "post_comments"
+    __tablename__: str = "post_comments"
 
     class CommentStatus(Enum):
         """Enumeration of comment statuses for the PostComments model.
@@ -50,13 +51,13 @@ class PostComments(db.Model): # type: ignore
         FLAGGED = "FLAGGED"
 
     # COLUMNS
-    post_comment_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
-    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    post_comment_text = db.Column(db.Text, nullable=False)
-    post_comment_status = db.Column(SQLAlchemyEnum(CommentStatus), nullable=False, default=CommentStatus.NORMAL)
-    parent_post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
+    post_comment_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
+    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    post_comment_text: str = db.Column(db.Text, nullable=False)
+    post_comment_status: CommentStatus = db.Column(SQLAlchemyEnum(CommentStatus), nullable=False, default=CommentStatus.NORMAL)
+    parent_post_comment_id: str = db.Column(db.String(36), db.ForeignKey("post_comments.post_comment_id"), nullable=True)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="comments")
@@ -77,7 +78,18 @@ class PostComments(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostComment {self.post_comment_id}>"
     
-    def to_dict(self, exclude_fields: list = ["post"]):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostComments model."""
+        ID = "id"
+        POST_ID = "post_id"
+        USER = "user"
+        CONTENT = "content"
+        STATUS = "status"
+        LIKE_COUNT = "like_count"
+        CREATED_AT = "created_at"
+        REPLIES = "replies"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the PostComments instance into a dictionary representation.
 
         This method converts the PostComments instance into a dictionary
@@ -91,18 +103,18 @@ class PostComments(db.Model): # type: ignore
         """
         like_count_relationship = getattr(self, "like_count", [])
         
-        data = {
+        data: dict = {
             "id": self.post_comment_id,
-            "post": self.post.to_dict(),
+            "post_id": self.post_id,
             "user": self.user.to_dict(),
             "content": self.post_comment_text,
             "status": self.post_comment_status.value,
             "like_count": like_count_relationship[0].post_comment_like_count if like_count_relationship and len(like_count_relationship) > 0 else 0,
             "created_at": self.created_at,
-            "replies": [reply.to_dict() for reply in self.replies] if "replies" not in exclude_fields else []
+            "replies": [reply.to_dict() for reply in self.replies] if self.replies else []
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

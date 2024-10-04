@@ -1,5 +1,6 @@
-import datetime
+from enum import Enum
 from app import db
+from datetime import datetime
 
 class UserGroups(db.Model): # type: ignore
     """Represents a record of user-created groups within the system.
@@ -25,15 +26,15 @@ class UserGroups(db.Model): # type: ignore
         None
     """
     #  TABLE NAME
-    __tablename__ = "user_groups"
+    __tablename__: str = "user_groups"
 
     # COLUMNS
-    private_group_id = db.Column(db.Integer, primary_key=True)
-    public_group_id = db.Column(db.String(10), nullable=False, unique=True)
-    group_name = db.Column(db.String(20), nullable=False)
-    group_description = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    owner_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    private_group_id: int = db.Column(db.Integer, primary_key=True)
+    public_group_id: str = db.Column(db.String(10), nullable=False, unique=True)
+    group_name: str = db.Column(db.String(20), nullable=False)
+    group_description: str = db.Column(db.Text, nullable=True)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    owner_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
 
     # Define the relationship to the Users model
     owner = db.relationship("Users", back_populates="groups")
@@ -44,7 +45,16 @@ class UserGroups(db.Model): # type: ignore
     def __repr__(self):
         return f"<UserGroup {self.private_group_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the UserGroups model."""
+        ID = "id"
+        NAME = "name"
+        DESCRIPTION = "description"
+        CREATED_AT = "created_at"
+        OWNER = "owner"
+        POSTS = "posts"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the UserGroups instance into a dictionary representation.
 
         This method converts the UserGroups instance into a dictionary
@@ -58,7 +68,7 @@ class UserGroups(db.Model): # type: ignore
         """
         posts = getattr(self, "posts", [])
 
-        data = {
+        data: dict = {
             "id": self.public_group_id,
             "name": self.group_name,
             "description": self.group_description,
@@ -68,6 +78,6 @@ class UserGroups(db.Model): # type: ignore
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

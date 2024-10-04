@@ -1,5 +1,7 @@
+from typing import Union
 from app import db
 from sqlalchemy.sql import func
+from datetime import datetime, date
 from sqlalchemy import Enum as SQLAlchemyEnum
 from enum import Enum
 
@@ -47,20 +49,20 @@ class Users(db.Model): # type: ignore
         moderator = "moderator"
 
     __tablename__ = "users"
-    private_user_id = db.Column(db.String(10), primary_key=True, nullable=False)
-    public_user_id = db.Column(db.String(10), unique=True, nullable=False)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    friend_code = db.Column(db.String(10), nullable=True, default=None)
-    password_hash = db.Column(db.String(255), nullable=False)
-    profile_picture_url = db.Column(db.String(255), nullable=True, default="https://placehold.co/400")
-    gender = db.Column(db.String(20), nullable=True, default=None)
-    country = db.Column(db.String(255), nullable=True, default=None)
-    orientation = db.Column(db.String(20), nullable=True, default=None)
-    biography = db.Column(db.Text, nullable=True)
-    user_type = db.Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.user)
-    birthdate = db.Column(db.Date, nullable=True, default=None)
-    created_at = db.Column(db.DateTime, nullable=False, default=func.now())
+    private_user_id: str = db.Column(db.String(10), primary_key=True, nullable=False)
+    public_user_id: str = db.Column(db.String(10), unique=True, nullable=False)
+    username: str = db.Column(db.String(20), unique=True, nullable=False)
+    email: str = db.Column(db.String(255), unique=True, nullable=False)
+    friend_code: str = db.Column(db.String(10), nullable=True, default=None)
+    password_hash: str = db.Column(db.String(255), nullable=False)
+    profile_picture_url: str = db.Column(db.String(255), nullable=True, default="https://placehold.co/400")
+    gender: str = db.Column(db.String(20), nullable=True, default=None)
+    country: str = db.Column(db.String(255), nullable=True, default=None)
+    orientation: str = db.Column(db.String(20), nullable=True, default=None)
+    biography: str = db.Column(db.Text, nullable=True)
+    user_type: UserType = db.Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.user)
+    birthdate: date = db.Column(db.Date, nullable=True, default=None)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define relationship to UserStats model
     stats = db.relationship("UserStats", uselist=False, back_populates="user", cascade="all, delete-orphan")
@@ -97,8 +99,26 @@ class Users(db.Model): # type: ignore
 
     def __repr__(self):
         return f"<User {self.private_user_id}>"
+    
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the Users model."""
+        ID = "id"
+        USERNAME = "username"
+        EMAIL = "email"
+        FRIEND_CODE = "friend_code"
+        PROFILE_PICTURE = "profile_picture"
+        GENDER = "gender"
+        COUNTRY = "country"
+        ORIENTATION = "orientation"
+        BIOGRAPHY = "biography"
+        USER_TYPE = "user_type"
+        BIRTH_DATE = "birth_date"
+        CREATED_AT = "created_at"
+        STATS = "stats"
+        ACTIVE_ACCESSORIES = "active_accessories"
 
-    def to_dict(self, exclude_fields=[]):
+
+    def to_dict(self, exclude_fields: list[DictKeys] = []):
         """Converts the Users instance into a dictionary representation.
 
         This method converts the Users instance into a dictionary representation,
@@ -110,37 +130,18 @@ class Users(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the Users instance.
         """
-        user_stats = self.stats or {}
-        active_profile_accessories = self.active_profile_accessories
+        from app.models import UserStats, UserProfileAccessories
 
-        # Initialize variables to hold media URLs
-        active_banner_url = None
-        active_profile_picture_border_url = None
-        active_badge_url = None
+        upa_dict_keys = UserProfileAccessories.DictKeys
 
-        if active_profile_accessories:
-            active_banner_url = (
-                active_profile_accessories.active_banner.profile_accessory.media_url
-                if active_profile_accessories.active_banner
-                else None
-            )
-            active_profile_picture_border_url = (
-                active_profile_accessories.active_profile_picture_border.profile_accessory.media_url
-                if active_profile_accessories.active_profile_picture_border
-                else None
-            )
-            active_badge_url = (
-                active_profile_accessories.active_badge.profile_accessory.media_url
-                if active_profile_accessories.active_badge
-                else None
-            )
+        user_stats: Union[UserStats, dict] = self.stats if isinstance(self.stats, UserStats) else {}
 
         data = {
-            "public_user_id": self.public_user_id,
+            "id": self.public_user_id,
             "username": self.username,
             "email": self.email,
             "friend_code": self.friend_code,
-            "profile_picture_url": self.profile_picture_url,
+            "profile_picture": self.profile_picture_url,
             "gender": self.gender,
             "country": self.country,
             "orientation": self.orientation,
@@ -148,15 +149,16 @@ class Users(db.Model): # type: ignore
             "user_type": self.user_type.value,
             "birth_date": self.birthdate,
             "created_at": self.created_at,
-            "user_stats": user_stats.to_dict(),
-            "active_accessories": {
-                "active_banner_url": active_banner_url,
-                "active_profile_picture_border_url": active_profile_picture_border_url,
-                "active_badge_url": active_badge_url,
-            },
+            "stats": user_stats.to_dict() if isinstance(user_stats, UserStats) else {},
+            "active_accessories": self.active_profile_accessories.to_dict(exclude_fields=[upa_dict_keys.USER_ID])
+            # "active_accessories": {
+            #     "active_banner_url": active_banner_url,
+            #     "active_profile_picture_border_url": active_profile_picture_border_url,
+            #     "active_badge_url": active_badge_url,
+            # },
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

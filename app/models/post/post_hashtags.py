@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class PostHashTags(db.Model): # type: ignore
@@ -18,11 +19,11 @@ class PostHashTags(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_hashtags"
+    __tablename__: str = "post_hashtags"
 
     # COLUMNS
-    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    hashtag_id = db.Column(db.String(36), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
+    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
+    hashtag_id: str = db.Column(db.String(36), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
 
     # Define relationship to HashTags model
     hashtag = db.relationship("HashTags", backref="post_hashtag")
@@ -31,7 +32,12 @@ class PostHashTags(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostHashTag {self.post_id}-{self.hashtag_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostHashTags model."""
+        POST_ID = "post_id"
+        HASHTAG_ID = "hashtag_id"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []):
         """Converts the PostHashTags instance into a dictionary representation.
 
         This method converts the PostHashTags instance into a dictionary
@@ -43,12 +49,12 @@ class PostHashTags(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostHashTags instance.
         """
-        data = {
+        data: dict = {
             "post_id": self.post_id,
-            "hashtag_id": self.hashtag_id
+            "hashtag": self.hashtag.to_dict()
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

@@ -1,5 +1,6 @@
-import datetime
 from app import db
+from datetime import datetime
+from enum import Enum
 from app.utils.id_generation import generate_uuid
 
 
@@ -19,18 +20,24 @@ class JWTTokenBlocklist(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "jwt_token_blocklist"
+    __tablename__: str = "jwt_token_blocklist"
 
     # COLUMNS
-    jwt_token_blocklist_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
-    jti = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    jwt_token_blocklist_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    jti: str = db.Column(db.String(255), nullable=False)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # METHODS
     def __repr__(self):
         return f"<Token {self.jti}>"
     
-    def to_dict(self, exclude_fields: list = []) -> dict:
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the JWTTokenBlocklist model."""
+        ID = "id"
+        JTI = "jti"
+        CREATED_AT = "created_at"
+    
+    def to_dict(self, exclude_fields: list = [DictKeys]) -> dict:
         """Converts the JWTTokenBlocklist instance into a dictionary representation.
 
         This method converts the JWTTokenBlocklist instance into a dictionary
@@ -42,14 +49,14 @@ class JWTTokenBlocklist(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the JWTTokenBlocklist instance.
         """
-        data = {
+        data: dict = {
             "id": self.jwt_token_blocklist_id,
             "jti": self.jti,
             "created_at": self.created_at
         }
         
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data
 

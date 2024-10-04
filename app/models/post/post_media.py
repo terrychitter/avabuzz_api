@@ -1,6 +1,8 @@
+from enum import Enum
 from app import db
+from datetime import datetime
 from app.utils.id_generation import generate_uuid
-import datetime
+
 
 class PostMedia(db.Model): # type: ignore
     """Represents a record of media content for user posts in the database.
@@ -24,15 +26,15 @@ class PostMedia(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_media"
+    __tablename__: str = "post_media"
 
     # COLUMNS
-    post_media_id = db.Column(db.Integer, primary_key=True, default=generate_uuid)
-    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
-    media_url = db.Column(db.String(255), nullable=False)
-    media_size_bytes = db.Column(db.Integer, nullable=False)
-    media_order = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    post_media_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
+    media_url: str = db.Column(db.String(255), nullable=False)
+    media_size_bytes: int = db.Column(db.Integer, nullable=False)
+    media_order: int = db.Column(db.Integer, nullable=False)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="media")
@@ -41,7 +43,16 @@ class PostMedia(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostMedia {self.post_media_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostMedia model."""
+        ID = "id"
+        POST_ID = "post_id"
+        URL = "url"
+        SIZE_BYTES = "size_bytes"
+        ORDER = "order"
+        CREATED_AT = "created_at"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the PostMedia instance into a dictionary representation.
 
         This method converts the PostMedia instance into a dictionary
@@ -53,13 +64,16 @@ class PostMedia(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostMedia instance.
         """
-        data = {
+        data: dict = {
+            "id": self.post_media_id,
+            "post_id": self.post_id,
             "url": self.media_url,
-            "order": self.media_order,
             "size_bytes": self.media_size_bytes,
+            "order": self.media_order,
+            "created_at": self.created_at
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data

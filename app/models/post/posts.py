@@ -1,5 +1,6 @@
-import datetime
+from typing import Optional
 from app import db
+from datetime import datetime
 from enum import Enum
 from app.utils.id_generation import generate_uuid
 from sqlalchemy import Enum as SQLAlchemyEnum
@@ -36,7 +37,7 @@ class Posts(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "posts"
+    __tablename__: str = "posts"
 
     class PostType(Enum):
         """Enumeration of post types for the Posts model.
@@ -59,14 +60,14 @@ class Posts(db.Model): # type: ignore
         EVENT = "event"
     
     # COLUMNS
-    post_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_caption = db.Column(db.Text, nullable=True)
-    post_type = db.Column(SQLAlchemyEnum(PostType), nullable=False)
+    post_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    post_caption: str = db.Column(db.Text, nullable=True)
+    post_type: PostType = db.Column(SQLAlchemyEnum(PostType), nullable=False)
     post_category_id = db.Column(db.Integer, db.ForeignKey("post_categories.post_category_id"), nullable=False)
-    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=True)
-    group_id = db.Column(db.String(10), db.ForeignKey("user_groups.private_group_id"), nullable=True)
-    view_count = db.Column(db.Integer, nullable=False, default=0)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=True)
+    group_id: str = db.Column(db.String(10), db.ForeignKey("user_groups.private_group_id"), nullable=True)
+    view_count: int = db.Column(db.Integer, nullable=False, default=0)
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     # Define relationship to PostCategories model
     post_category = db.relationship("PostCategories", back_populates="posts")
@@ -99,7 +100,22 @@ class Posts(db.Model): # type: ignore
     def __repr__(self):
         return f"<Post {self.post_id}>"
     
-    def to_dict(self, user_id=None, exclude_fields: list = ["user_reacted"]):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the Posts model."""
+        ID = "id"
+        CAPTION = "caption"
+        TYPE = "type"
+        CATEGORY = "category"
+        VIEW_COUNT = "view_count"
+        POSTER = "poster"
+        CREATED_AT = "created_at"
+        HASHTAGS = "hashtags"
+        MEDIA = "media"
+        REACTIONS = "reactions"
+        USER_REACTED = "user_reacted"
+        USER_REACTION_TYPE = "user_reaction_type"
+    
+    def to_dict(self, user_id: Optional[str] = None, exclude_fields: list[DictKeys] = [DictKeys.USER_REACTED]) -> dict:
         """Converts the Posts instance into a dictionary representation.
         
         This method converts the Posts instance into a dictionary representation,
@@ -118,7 +134,7 @@ class Posts(db.Model): # type: ignore
         reactions_relationship = getattr(self, "reactions", [])
         post_reactions_relationship = getattr(self, "post_reactions", [])
         
-        data = {
+        data: dict = {
             "id": self.post_id,
             "caption": self.post_caption,
             "type": self.post_type.value,
@@ -139,6 +155,6 @@ class Posts(db.Model): # type: ignore
 
         # Remove excluded fields from the dictionary
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

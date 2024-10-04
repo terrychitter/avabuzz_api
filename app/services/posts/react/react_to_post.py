@@ -80,7 +80,7 @@ def react_to_post(private_user_id: str, post_id: int, reaction: str) -> Tuple[Re
 
         db.session.commit()  
         
-        return jsonify({"message": f"Reacted to post {post_id} with {reaction}"}), 200
+        return jsonify({"message": f"Successfully reacted to post"}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error reacting to post", "error": str(e)}), 500

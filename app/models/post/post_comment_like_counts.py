@@ -1,4 +1,5 @@
 from app import db
+from enum import Enum
 
 class PostCommentLikeCounts(db.Model): # type: ignore
     """Represents a record of like counts for post comments in the database.
@@ -14,11 +15,11 @@ class PostCommentLikeCounts(db.Model): # type: ignore
         comment (PostComments): A relationship to the PostComments model, indicating the comment associated with the like count.
     """
     # TABLE NAME
-    __tablename__ = "post_comment_like_counts"
+    __tablename__: str = "post_comment_like_counts"
 
     # COLUMNS
-    post_comment_id = db.Column(db.Integer, db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
-    post_comment_like_count = db.Column(db.Integer, nullable=False, default=0)
+    post_comment_id: str = db.Column(db.String(36), db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
+    post_comment_like_count: int = db.Column(db.Integer, nullable=False, default=0)
 
     # Define relationship to PostComments model
     comment = db.relationship("PostComments", back_populates="like_count")
@@ -27,7 +28,12 @@ class PostCommentLikeCounts(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostCommentLikeCount {self.post_comment_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostCommentLikeCounts model."""
+        COMMENT_ID = "comment_id"
+        LIKE_COUNT = "like_count"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the PostCommentLikeCounts instance into a dictionary representation.
 
         This method converts the PostCommentLikeCounts instance into a dictionary
@@ -39,12 +45,12 @@ class PostCommentLikeCounts(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostCommentLikeCounts instance.
         """
-        data = {
-            "comment": self.comment.to_dict(),
+        data: dict = {
+            "comment_id": self.post_comment_id,
             "like_count": self.post_comment_like_count
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

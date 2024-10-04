@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 from app.utils.id_generation import generate_uuid
 
@@ -26,13 +27,13 @@ class HashTags(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "hashtags"
+    __tablename__: str = "hashtags"
 
     # COLUMNS
-    hashtag_id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    hashtag_name = db.Column(db.String(50), nullable=False)
-    views = db.Column(db.Integer, default=0)
-    post_count = db.Column(db.Integer, default=0)
+    hashtag_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    hashtag_name: str = db.Column(db.String(50), nullable=False)
+    views: int = db.Column(db.Integer, default=0)
+    post_count: int = db.Column(db.Integer, default=0)
 
     # RELATIONSHIPS
     posts = db.relationship("Posts", secondary="post_hashtags", back_populates="hashtags")
@@ -41,9 +42,16 @@ class HashTags(db.Model): # type: ignore
     def __repr__(self):
         return f"<HashTag {self.hashtag_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the HashTags model."""
+        ID = "id"
+        NAME = "name"
+        VIEWS = "views"
+        POST_COUNT = "post_count"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the HashTags instance into a dictionary representation.
-        
+
         This method converts the HashTags instance into a dictionary
         representation, allowing for exclusion of specified fields.
 
@@ -53,7 +61,7 @@ class HashTags(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the HashTags instance.
         """
-        data = {
+        data: dict = {
             "id": self.hashtag_id,
             "name": self.hashtag_name,
             "views": self.views,
@@ -61,6 +69,6 @@ class HashTags(db.Model): # type: ignore
         }
     
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
     
         return data

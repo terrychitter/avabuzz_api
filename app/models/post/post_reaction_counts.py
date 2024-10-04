@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class PostReactionCounts(db.Model): # type: ignore
@@ -19,12 +20,12 @@ class PostReactionCounts(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_reaction_counts"
+    __tablename__: str = "post_reaction_counts"
 
     # COLUMNS
-    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
-    reaction_count = db.Column(db.Integer, nullable=False, default=0)
+    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
+    post_reaction_type: str = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+    reaction_count: int = db.Column(db.Integer, nullable=False, default=0)
 
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="reactions")
@@ -32,8 +33,14 @@ class PostReactionCounts(db.Model): # type: ignore
     # METHODS
     def __repr__(self):
         return f"<PostReactionCount {self.post_id}-{self.post_reaction_type}>"
+    
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostReactionCounts model."""
+        POST_ID = "post_id"
+        REACTION_TYPE = "reaction_type"
+        REACTION_COUNT = "reaction_count"
 
-    def to_dict(self, exclude_fields: list = []):
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the PostReactionCounts instance into a dictionary representation.
 
         This method converts the PostReactionCounts instance into a dictionary
@@ -45,13 +52,13 @@ class PostReactionCounts(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostReactionCounts instance.
         """
-        data = {
+        data: dict = {
             "post_id": self.post_id,
             "type": self.post_reaction_type,
             "count": self.reaction_count
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data

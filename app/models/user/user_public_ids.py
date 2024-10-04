@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 
@@ -16,16 +17,20 @@ class UserPublicId(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "user_public_ids"
+    __tablename__: str = "user_public_ids"
 
     # COLUMNS
-    public_id = db.Column(db.String(10), primary_key=True)
+    public_id: str = db.Column(db.String(10), primary_key=True)
 
     # METHODS
     def __repr__(self):
         return f"<UserPublicId {self.public_id}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the UserPublicId model."""
+        ID = "id"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []) -> dict:
         """Converts the UserPublicId instance into a dictionary representation.
         
         This method converts the UserPublicId instance into a dictionary
@@ -37,12 +42,12 @@ class UserPublicId(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the UserPublicId instance.
         """
-        data = {
+        data: dict = {
             "id": self.public_id
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
 
         return data
 

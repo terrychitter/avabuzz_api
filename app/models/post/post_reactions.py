@@ -1,3 +1,4 @@
+from enum import Enum
 from app import db
 
 class PostReactions(db.Model): # type: ignore
@@ -21,12 +22,12 @@ class PostReactions(db.Model): # type: ignore
         None
     """
     # TABLE NAME
-    __tablename__ = "post_reactions"
+    __tablename__: str = "post_reactions"
 
     # COLUMNS
-    post_id = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    user_id = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
-    post_reaction_type = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
+    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
+    post_reaction_type: str = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
 
     # Define relationship to Users model
     user = db.relationship("Users", back_populates="post_reactions")
@@ -38,7 +39,13 @@ class PostReactions(db.Model): # type: ignore
     def __repr__(self):
         return f"<PostReaction {self.post_id}-{self.user_id}-{self.post_reaction_type}>"
     
-    def to_dict(self, exclude_fields: list = []):
+    class DictKeys(Enum):
+        """Defines keys for the dictionary representation of the PostReactions model."""
+        POST_ID = "post_id"
+        USER_ID = "user_id"
+        REACTION = "reaction"
+    
+    def to_dict(self, exclude_fields: list[DictKeys] = []):
         """Converts the PostReactions instance into a dictionary representation.
 
         This method converts the PostReactions instance into a dictionary
@@ -50,13 +57,13 @@ class PostReactions(db.Model): # type: ignore
         Returns:
             dict: A dictionary representation of the PostReactions instance.
         """
-        data = {
-            "post_id": self.post.to_dict(),
-            "user_id": self.user.to_dict(),
+        data: dict = {
+            "post_id": self.post_id,
+            "user": self.user.to_dict(),
             "reaction": self.post_reaction_type
         }
 
         for field in exclude_fields:
-            data.pop(field, None)
+            data.pop(field.value, None)
         
         return data
