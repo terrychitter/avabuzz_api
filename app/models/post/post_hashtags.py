@@ -1,5 +1,14 @@
-from enum import Enum
 from app import db
+from enum import Enum
+from sqlalchemy import String
+from sqlalchemy.orm import validates
+from app.utils.validation import valid_uuid
+from app.models.post.posts import valid_post_id
+from app.models.post.hashtags import valid_hashtag_id
+from app.types.length import (
+    POST_ID_LENGTH,
+    HASHTAG_ID_LENGTH
+)
 
 class PostHashTags(db.Model): # type: ignore
     """Represents a record of hashtags associated with user posts in the database.
@@ -22,11 +31,27 @@ class PostHashTags(db.Model): # type: ignore
     __tablename__: str = "post_hashtags"
 
     # COLUMNS
-    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    hashtag_id: str = db.Column(db.String(36), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
+    post_id: str = db.Column(String(POST_ID_LENGTH), db.ForeignKey("posts.post_id"), primary_key=True)
+    hashtag_id: str = db.Column(String(HASHTAG_ID_LENGTH), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
 
     # Define relationship to HashTags model
     hashtag = db.relationship("HashTags", backref="post_hashtag")
+
+    #region VALIDATION
+    # POST_ID
+    @validates("post_id")
+    def validate_post_id(self, key, post_id: str) -> str:
+        if not valid_post_id(post_id):
+            raise ValueError("Invalid post ID.")
+        return post_id
+    
+    # HASHTAG_ID
+    @validates("hashtag_id")
+    def validate_hashtag_id(self, key, hashtag_id: str) -> str:
+        if not valid_hashtag_id(hashtag_id):
+            raise ValueError("Invalid hashtag ID.")
+        return hashtag_id
+    #endregion
 
     # METHODS
     def __repr__(self):

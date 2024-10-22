@@ -1,6 +1,27 @@
+from typing import Optional
+import uuid
 from app import db
-from app.utils.id_generation import generate_uuid
 from enum import Enum
+from sqlalchemy import String, Text
+from sqlalchemy.orm import validates
+from app.utils.id_generation import generate_uuid
+from app.utils.validation import valid_uuid, valid_string
+from app.types.length import (
+    POST_CATEGORY_ID_LENGTH,
+    POST_CATEGORY_NAME_LENGTH_MIN,
+    POST_CATEGORY_NAME_LENGTH_MAX
+)
+
+def valid_post_category_id(post_category_id: Optional[str]) -> bool:
+    """Validates a post category identifier based on the UUID format.
+
+    Args:
+        post_category_id (str): The post category identifier to be validated.
+
+    Returns:
+        bool: True if the post category identifier is valid, False otherwise.
+    """
+    return valid_uuid(post_category_id)
 
 class PostCategories(db.Model): # type: ignore
     """Represents a record of post categories in the database.
@@ -23,13 +44,29 @@ class PostCategories(db.Model): # type: ignore
     __tablename__: str = "post_categories"
 
     # COLUMNS
-    post_category_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_category_name: str = db.Column(db.String(50), nullable=False)
-    post_category_description: str = db.Column(db.Text, nullable=True)
+    post_category_id: str = db.Column(String(POST_CATEGORY_ID_LENGTH), primary_key=True, default=generate_uuid)
+    post_category_name: str = db.Column(String(POST_CATEGORY_NAME_LENGTH_MAX), nullable=False)
+    post_category_description: str = db.Column(Text, nullable=True)
 
     # Define the relationship to the Posts model
     posts = db.relationship("Posts", back_populates="post_category")
 
+    #region VALIDATION
+    # POST_CATEGORY_ID
+    @validates("post_category_id")
+    def validate_post_category_id(self, key, post_category_id: str) -> str:
+        if not valid_post_category_id(post_category_id):
+            raise ValueError("Invalid post category identifier.")
+        return post_category_id
+    
+    # POST_CATEGORY_NAME
+    @validates("post_category_name")
+    def validate_post_category_name(self, key, post_category_name: str) -> str:
+        if not valid_string(post_category_name, length=(POST_CATEGORY_NAME_LENGTH_MIN, POST_CATEGORY_NAME_LENGTH_MAX), allow_empty=False):
+            raise ValueError(f"Invalid post category name length, expected length between {POST_CATEGORY_NAME_LENGTH_MIN} and {POST_CATEGORY_NAME_LENGTH_MAX} characters.")
+        return post_category_name
+    #endregion
+    
     # METHODS
     def __repr__(self):
         return f"<PostCategory {self.post_category_id}>"

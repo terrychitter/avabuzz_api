@@ -32,7 +32,7 @@ class UserFollowers(db.Model): # type: ignore
     follow_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     follower_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     followee_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    followed_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    followed_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # RELATIONSHIPS
     follower = db.relationship("Users", foreign_keys=[follower_user_id])

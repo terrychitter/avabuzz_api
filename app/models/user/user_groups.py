@@ -33,7 +33,7 @@ class UserGroups(db.Model): # type: ignore
     public_group_id: str = db.Column(db.String(10), nullable=False, unique=True)
     group_name: str = db.Column(db.String(20), nullable=False)
     group_description: str = db.Column(db.Text, nullable=True)
-    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
     owner_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
 
     # Define the relationship to the Users model

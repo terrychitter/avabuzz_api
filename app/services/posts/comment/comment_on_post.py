@@ -2,7 +2,7 @@ from app import db
 from typing import Tuple
 from flask import Response, jsonify
 from app.models import Users, Posts, PostComments, PostCommentLikeCounts
-from app.utils.validation_utils import validate_required_fields
+from app.utils.validation import validate_required_fields
 
 
 def comment_on_post(private_user_id: str, post_id: int, comment_data: dict) -> Tuple[Response, int]:

@@ -1,5 +1,13 @@
+import uuid
 from app import db
 from enum import Enum
+from sqlalchemy.orm import validates
+from sqlalchemy import Integer, String
+from app.models.post.post_comments import valid_post_comment_id
+from app.utils.validation import valid_uuid, valid_integer
+from app.types.length import (
+    POST_COMMENT_ID_LENGTH
+)
 
 class PostCommentLikeCounts(db.Model): # type: ignore
     """Represents a record of like counts for post comments in the database.
@@ -18,11 +26,27 @@ class PostCommentLikeCounts(db.Model): # type: ignore
     __tablename__: str = "post_comment_like_counts"
 
     # COLUMNS
-    post_comment_id: str = db.Column(db.String(36), db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
-    post_comment_like_count: int = db.Column(db.Integer, nullable=False, default=0)
+    post_comment_id: str = db.Column(String(POST_COMMENT_ID_LENGTH), db.ForeignKey("post_comments.post_comment_id"), primary_key=True)
+    post_comment_like_count: int = db.Column(Integer, nullable=False, default=0)
 
     # Define relationship to PostComments model
     comment = db.relationship("PostComments", back_populates="like_count")
+
+    #region VALIDATION
+    # POST_COMMENT_ID
+    @validates("post_comment_id")
+    def validate_post_comment_id(self, key, post_comment_id: str) -> str:
+        if not valid_post_comment_id(post_comment_id):
+            raise ValueError("Invalid post comment identifier.")
+        return post_comment_id
+    
+    # POST_COMMENT_LIKE_COUNT
+    @validates("post_comment_like_count")
+    def validate_post_comment_like_count(self, key, post_comment_like_count: int) -> int:
+        if not valid_integer(post_comment_like_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid post comment like count.")
+        return post_comment_like_count
+    #endregion VALIDATION
 
     # METHODS
     def __repr__(self):

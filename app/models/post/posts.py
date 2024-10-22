@@ -1,9 +1,31 @@
-from typing import Optional
 from app import db
-from datetime import datetime
 from enum import Enum
+from datetime import datetime
+from typing import Optional, Union
+from app.types.enum import PostType
+from sqlalchemy.orm import validates
+from app.utils.validation import valid_uuid, valid_enum_element, valid_datetime, valid_integer
+from app.models.post.post_categories import valid_post_category_id
+from app.models.user.users import valid_user_id
 from app.utils.id_generation import generate_uuid
-from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy import DateTime, Enum as SQLAlchemyEnum, Integer, String, Text
+from app.types.length import (
+    POST_ID_LENGTH,
+    POST_CATEGORY_ID_LENGTH,
+    USER_PRIVATE_ID_LENGTH,
+    USER_GROUP_PRIVATE_ID_LENGTH
+)
+
+def valid_post_id(value: Optional[str]) -> bool:
+    """Validates a post identifier based on the UUID format.
+
+    Args:
+        value (str): The post identifier to be validated.
+
+    Returns:
+        bool: True if the post identifier is valid, False otherwise.
+    """
+    return valid_uuid(value)
 
 class Posts(db.Model): # type: ignore
     """Represents a record of user posts in the database.
@@ -16,7 +38,7 @@ class Posts(db.Model): # type: ignore
         post_id (str): The unique identifier for the post, which serves as the primary key. Defaults to a generated UUID.
         post_caption (str, optional): The caption or text content of the post, which can be null.
         post_type (PostType): The type of the post, which is an enumeration of post types. This cannot be null.
-        post_category_id (int): The unique identifier for the post category, linked to the `post_categories` table. This cannot be null.
+        post_category_id (str): The unique identifier for the post category, linked to the `post_categories` table. This cannot be null.
         user_id (str, optional): The unique identifier for the user who created the post, linked to the `users` table. This can be null for group posts.
         group_id (str, optional): The unique identifier for the group to which the post belongs, linked to the `user_groups` table. This can be null for user posts.
         view_count (int): The number of views or interactions on the post. Defaults to 0.
@@ -38,36 +60,16 @@ class Posts(db.Model): # type: ignore
     """
     # TABLE NAME
     __tablename__: str = "posts"
-
-    class PostType(Enum):
-        """Enumeration of post types for the Posts model.
-
-        This enumeration defines the different types of posts that can be created
-        by users, including text posts, image posts, video posts, and event posts.
-
-        Attributes:
-            post (str): A text-based post with no media content.
-            image (str): A post containing an image or photo.
-            video (str): A post containing a video.
-            event (str): A post indicating an event or activity.
-        
-        Returns:
-            None
-        """
-        POST = "post"
-        IMAGE = "image"
-        VIDEO = "video"
-        EVENT = "event"
     
     # COLUMNS
-    post_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_caption: str = db.Column(db.Text, nullable=True)
+    post_id: str = db.Column(String(POST_ID_LENGTH), primary_key=True, default=generate_uuid)
+    post_caption: str = db.Column(Text, nullable=True)
     post_type: PostType = db.Column(SQLAlchemyEnum(PostType), nullable=False)
-    post_category_id = db.Column(db.Integer, db.ForeignKey("post_categories.post_category_id"), nullable=False)
-    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=True)
-    group_id: str = db.Column(db.String(10), db.ForeignKey("user_groups.private_group_id"), nullable=True)
-    view_count: int = db.Column(db.Integer, nullable=False, default=0)
-    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    post_category_id: str = db.Column(String(POST_CATEGORY_ID_LENGTH), db.ForeignKey("post_categories.post_category_id"), nullable=False)
+    user_id: str = db.Column(String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=True)
+    group_id: str = db.Column(String(USER_GROUP_PRIVATE_ID_LENGTH), db.ForeignKey("user_groups.private_group_id"), nullable=True)
+    view_count: int = db.Column(Integer, nullable=False, default=0)
+    created_at: datetime = db.Column(DateTime, nullable=False, default=datetime.now)
 
     # Define relationship to PostCategories model
     post_category = db.relationship("PostCategories", back_populates="posts")
@@ -96,6 +98,55 @@ class Posts(db.Model): # type: ignore
     # Define relationship to PostComments model
     comments = db.relationship("PostComments", back_populates="post", cascade="all, delete-orphan")
 
+    #region VALIDATION
+    # POST_ID
+    @validates("post_id")
+    def validate_post_id(self, key, post_id: str) -> str:
+        if not valid_post_id(post_id):
+            raise ValueError("Invalid post ID.")
+        return post_id
+    
+    # POST_TYPE
+    @validates("post_type")
+    def validate_post_type(self, key, post_type: Union[PostType, str]) -> str:
+        if not valid_enum_element(post_type, PostType):
+            raise ValueError("Invalid post type.")
+        return PostType(post_type).value
+    
+    # POST_CATEGORY_ID
+    @validates("post_category_id")
+    def validate_post_category_id(self, key, post_category_id: str) -> str:
+        if not valid_post_category_id(post_category_id):
+            raise ValueError("Invalid post category ID.")
+        return post_category_id
+
+    
+    # USER_ID
+    @validates("user_id")
+    def validate_user_id(self, key, user_id: str) -> str:
+        if not valid_user_id(user_id):
+            raise ValueError("Invalid user ID.")
+        return user_id
+    
+    # GROUP_ID
+    # TODO: Add validation for group_id
+
+    # VIEW_COUNT
+    @validates("view_count")
+    def validate_view_count(self, key, view_count: int) -> int:
+        if not valid_integer(view_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid view count.")
+        return view_count
+
+    
+    # CREATED_AT
+    @validates("created_at")
+    def validate_created_at(self, key, created_at: datetime) -> datetime:
+        if not valid_datetime(created_at):
+            raise ValueError("Invalid created at datetime.")
+        return created_at
+    #endregion VALIDATION
+    
     # METHODS
     def __repr__(self):
         return f"<Post {self.post_id}>"

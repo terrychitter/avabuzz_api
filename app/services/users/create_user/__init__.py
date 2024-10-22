@@ -62,7 +62,6 @@ def add_initial_owned_accessories(user_id: str, accessories: List[ProfileAccesso
         owned_accessory = OwnedAccessories(
             user_id=user_id,
             accessory_id=accessory.accessory_id,
-            created_at=datetime.datetime.now()
         )
         db.session.add(owned_accessory)
 

@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 from app import db
 from app.models import Users
 from app.utils.db_utils import value_exists
-from app.utils.validation_utils import valid_email, valid_friend_code
+from app.utils.validation import valid_email, valid_friend_code
 
 def update_user(private_user_id: str, user_data: dict) -> Tuple[Response, int]:
     """

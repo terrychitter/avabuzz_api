@@ -40,7 +40,7 @@ class OwnedAccessories(db.Model): # type: ignore
     user_id: str = db.Column(
         db.String(10), db.ForeignKey("users.private_user_id"), nullable=True
     )
-    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
     accessory_id: str = db.Column(
         db.String(36), db.ForeignKey("profile_accessories.accessory_id"), nullable=False
     )

@@ -1,5 +1,14 @@
-from enum import Enum
 from app import db
+from enum import Enum
+from sqlalchemy.orm import validates
+from app.utils.validation import valid_integer
+from app.models.post.posts import valid_post_id
+from app.models.post.post_reaction_types import valid_post_reaction_type
+from sqlalchemy import Integer, String
+from app.types.length import (
+    POST_ID_LENGTH,
+    POST_REACTION_TYPE_LENGTH
+)
 
 class PostReactionCounts(db.Model): # type: ignore
     """Represents a record of reaction counts on user posts in the database.
@@ -23,16 +32,39 @@ class PostReactionCounts(db.Model): # type: ignore
     __tablename__: str = "post_reaction_counts"
 
     # COLUMNS
-    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    post_reaction_type: str = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
-    reaction_count: int = db.Column(db.Integer, nullable=False, default=0)
+    post_id: str = db.Column(String(POST_ID_LENGTH), db.ForeignKey("posts.post_id"), primary_key=True)
+    post_reaction_type: str = db.Column(String(POST_REACTION_TYPE_LENGTH), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+    reaction_count: int = db.Column(Integer, nullable=False, default=0)
 
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="reactions")
 
+    #region VALIDATION
+    # POST_ID
+    @validates("post_id")
+    def validate_post_id(self, key, post_id: str) -> str:
+        if not valid_post_id(post_id):
+            raise ValueError("Invalid post ID.")     
+        return post_id
+
+    # POST_REACTION_TYPE
+    @validates("post_reaction_type")
+    def validate_post_reaction_type(self, key, post_reaction_type: str) -> str:
+        if not valid_post_reaction_type(post_reaction_type):
+            raise ValueError("Invalid post reaction type.")
+        return post_reaction_type
+    
+    # REACTION_COUNT
+    @validates("reaction_count")
+    def validate_reaction_count(self, key, reaction_count: int) -> int:
+        if not valid_integer(reaction_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid reaction count.")
+        return reaction_count
+    #endregion VALIDATION
+    
     # METHODS
     def __repr__(self):
-        return f"<PostReactionCount {self.post_id}-{self.post_reaction_type}>"
+        return f"<PostReactionCount {self.post_id} {self.post_reaction_type.upper()}>"
     
     class DictKeys(Enum):
         """Defines keys for the dictionary representation of the PostReactionCounts model."""

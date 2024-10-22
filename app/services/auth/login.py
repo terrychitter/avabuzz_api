@@ -4,7 +4,7 @@ from typing import Dict, Tuple
 from flask import Response, jsonify
 from app.models import Users
 from werkzeug.security import check_password_hash
-from app.utils.validation_utils import validate_required_fields
+from app.utils.validation import validate_required_fields
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 def login(login_data: Dict[str, str]) -> Tuple[Response, int]:

@@ -1,8 +1,30 @@
+from typing import Optional, Union
 from app import db
 from enum import Enum
 from datetime import datetime
+from app.types.enum import CommentStatus
 from app.utils.id_generation import generate_uuid
-from sqlalchemy import Enum as SQLAlchemyEnum
+from app.models.user.users import valid_user_id
+from sqlalchemy import DateTime, Enum as SQLAlchemyEnum, String, Text
+from sqlalchemy.orm import validates
+from app.utils.validation import valid_uuid, valid_post_id, valid_enum_element, valid_datetime, valid_text
+from app.types.length import (
+    POST_COMMENT_ID_LENGTH,
+    POST_ID_LENGTH,
+    USER_PRIVATE_ID_LENGTH,
+    PARENT_POST_COMMENT_ID_LENGTH
+)
+
+def valid_post_comment_id(post_comment_id: Optional[str]) -> bool:
+    """Validates a post comment identifier based on the UUID format.
+
+    Args:
+        post_comment_id (str): The post comment identifier to be validated.
+
+    Returns:
+        bool: True if the post comment identifier is valid, False otherwise.
+    """
+    return valid_uuid(post_comment_id)
 
 class PostComments(db.Model): # type: ignore
     """
@@ -32,32 +54,14 @@ class PostComments(db.Model): # type: ignore
     # TABLE NAME
     __tablename__: str = "post_comments"
 
-    class CommentStatus(Enum):
-        """Enumeration of comment statuses for the PostComments model.
-
-        This enumeration defines the different statuses that a comment can have,
-        including normal comments, hidden comments, and flagged comments.
-
-        Attributes:
-            NORMAL (str): A normal comment that is visible to users.
-            HIDDEN (str): A hidden comment that is not visible to users.
-            FLAGGED (str): A flagged comment that requires moderation.
-        
-        Returns:
-            None
-        """
-        NORMAL = "NORMAL"
-        HIDDEN = "HIDDEN"
-        FLAGGED = "FLAGGED"
-
     # COLUMNS
-    post_comment_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), nullable=False)
-    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    post_comment_text: str = db.Column(db.Text, nullable=False)
+    post_comment_id: str = db.Column(String(POST_COMMENT_ID_LENGTH), primary_key=True, default=generate_uuid)
+    post_id: str = db.Column(String(POST_ID_LENGTH), db.ForeignKey("posts.post_id"), nullable=False)
+    user_id: str = db.Column(String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=False)
+    post_comment_text: str = db.Column(Text, nullable=False)
     post_comment_status: CommentStatus = db.Column(SQLAlchemyEnum(CommentStatus), nullable=False, default=CommentStatus.NORMAL)
-    parent_post_comment_id: str = db.Column(db.String(36), db.ForeignKey("post_comments.post_comment_id"), nullable=True)
-    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    parent_post_comment_id: str = db.Column(String(PARENT_POST_COMMENT_ID_LENGTH), db.ForeignKey("post_comments.post_comment_id"), nullable=True)
+    created_at: datetime = db.Column(DateTime, nullable=False, default=datetime.now)
 
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="comments")
@@ -73,6 +77,57 @@ class PostComments(db.Model): # type: ignore
 
     # Define relationship to PostCommentLikeCounts model
     like_count = db.relationship("PostCommentLikeCounts", back_populates="comment", cascade="all, delete-orphan")
+
+    #region VALIDATION
+    # POST_COMMENT_ID
+    @validates("post_comment_id")
+    def validate_post_comment_id(self, key, post_comment_id: str) -> str:
+        if not valid_post_comment_id(post_comment_id):
+            raise ValueError("Invalid post comment ID")
+        return post_comment_id
+    
+    # POST_ID
+    @validates("post_id")
+    def validate_post_id(self, key, post_id: str) -> str:
+        if not valid_post_id(post_id):
+            raise ValueError("Invalid post ID")
+        return post_id
+    
+    # USER_ID
+    @validates("user_id")
+    def validate_user_id(self, key, user_id: str) -> str:
+        if not valid_user_id(user_id):
+            raise ValueError("Invalid user ID")
+        return user_id
+    
+    # POST_COMMENT_TEXT
+    @validates("post_comment_text")
+    def validate_post_comment_text(self, key, post_comment_text: str) -> str:
+        if valid_text(post_comment_text, limit=False, allow_empty=False):
+            raise ValueError("Invalid post comment text")
+        return post_comment_text
+    
+    # POST_COMMENT_STATUS
+    @validates("post_comment_status")
+    def validate_post_comment_status(self, key, post_comment_status: Union[CommentStatus, str]) -> str:
+        if not valid_enum_element(post_comment_status, CommentStatus):
+            raise ValueError("Invalid comment status")
+        return CommentStatus(post_comment_status).value
+    
+    # PARENT_POST_COMMENT_ID
+    @validates("parent_post_comment_id")
+    def validate_parent_post_comment_id(self, key, parent_post_comment_id: str) -> str:
+        if not valid_post_comment_id(parent_post_comment_id):
+            raise ValueError("Invalid parent post comment ID")
+        return parent_post_comment_id
+
+    # CREATED_AT
+    @validates("created_at")
+    def validate_created_at(self, key, created_at: datetime) -> datetime:
+        if not valid_datetime(created_at):
+            raise ValueError("Invalid created at datetime")
+        return created_at
+    #endregion
 
     # METHODS
     def __repr__(self):

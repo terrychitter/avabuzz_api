@@ -1,9 +1,25 @@
-from typing import Union
+from typing import Optional, Union
 from app import db
 from sqlalchemy.sql import func
 from datetime import datetime, date
+from app.types.length import USER_PRIVATE_ID_LENGTH
 from sqlalchemy import Enum as SQLAlchemyEnum
 from enum import Enum
+
+# ----------------- VALIDATE USER ID ----------------- #
+def valid_user_id(value: Optional[str]) -> bool:
+    """
+    Validates a user identifier.
+
+    Args:
+        value (str): The user identifier to be validated.
+
+    Returns:
+        bool: True if the user identifier is valid, False otherwise.
+    """
+    if not value or len(value) != USER_PRIVATE_ID_LENGTH:
+        return False
+    return True
 
 class Users(db.Model): # type: ignore
     """Represents a user account in the system.
@@ -62,7 +78,7 @@ class Users(db.Model): # type: ignore
     biography: str = db.Column(db.Text, nullable=True)
     user_type: UserType = db.Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.user)
     birthdate: date = db.Column(db.Date, nullable=True, default=None)
-    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Define relationship to UserStats model
     stats = db.relationship("UserStats", uselist=False, back_populates="user", cascade="all, delete-orphan")

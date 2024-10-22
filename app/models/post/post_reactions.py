@@ -1,5 +1,15 @@
-from enum import Enum
 from app import db
+from enum import Enum
+from sqlalchemy import String
+from sqlalchemy.orm import validates
+from app.models.post.posts import valid_post_id
+from app.models.post.post_reaction_types import valid_post_reaction_type
+from app.models.user.users import valid_user_id
+from app.types.length import (
+    POST_ID_LENGTH,
+    USER_PRIVATE_ID_LENGTH,
+    POST_REACTION_TYPE_LENGTH
+)
 
 class PostReactions(db.Model): # type: ignore
     """
@@ -25,9 +35,9 @@ class PostReactions(db.Model): # type: ignore
     __tablename__: str = "post_reactions"
 
     # COLUMNS
-    post_id: str = db.Column(db.String(36), db.ForeignKey("posts.post_id"), primary_key=True)
-    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
-    post_reaction_type: str = db.Column(db.String(20), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
+    post_id: str = db.Column(String(POST_ID_LENGTH), db.ForeignKey("posts.post_id"), primary_key=True)
+    user_id: str = db.Column(String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), primary_key=True)
+    post_reaction_type: str = db.Column(String(POST_REACTION_TYPE_LENGTH), db.ForeignKey("post_reaction_types.post_reaction_type"), primary_key=True)
 
     # Define relationship to Users model
     user = db.relationship("Users", back_populates="post_reactions")
@@ -35,9 +45,32 @@ class PostReactions(db.Model): # type: ignore
     # Define relationship to Posts model
     post = db.relationship("Posts", back_populates="post_reactions")
 
+    #region VALIDATION
+    # POST_ID
+    @validates("post_id")
+    def validate_post_id(self, key, post_id: str) -> str:
+        if not valid_post_id(post_id):
+            raise ValueError("Invalid post ID.")
+        return post_id
+    
+    # USER_ID
+    @validates("user_id")
+    def validate_user_id(self, key, user_id: str) -> str:
+        if not valid_user_id(user_id):
+            raise ValueError("Invalid user ID.")
+        return user_id
+    
+    # POST_REACTION_TYPE
+    @validates("post_reaction_type")
+    def validate_post_reaction_type(self, key, post_reaction_type: str) -> str:
+        if not valid_post_reaction_type(post_reaction_type):
+            raise ValueError("Invalid post reaction type.")
+        return post_reaction_type
+    #endregion VALIDATION
+    
     # METHODS
     def __repr__(self):
-        return f"<PostReaction {self.post_id}-{self.user_id}-{self.post_reaction_type}>"
+        return f"<PostReaction {self.post_id} {self.user_id} {self.post_reaction_type.upper()}>"
     
     class DictKeys(Enum):
         """Defines keys for the dictionary representation of the PostReactions model."""

@@ -1,7 +1,7 @@
 from app import db
 from typing import Tuple
 from flask import jsonify, Response
-from app.utils.validation_utils import validate_required_fields
+from app.utils.validation import validate_required_fields
 from app.models import Users, UserStats, HashTags, PostCategories, PostMedia, Posts, PostHashTags, PostReactionCounts, PostReactionTypes
 
 def create_post(private_user_id: str, post_data: dict) -> Tuple[Response, int]:

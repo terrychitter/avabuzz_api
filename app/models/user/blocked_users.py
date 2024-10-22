@@ -33,7 +33,7 @@ class BlockedUsers(db.Model): # type: ignore
     blocked_users_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     blocker_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
     blocked_id: str= db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    blocked_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    blocked_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Define the relationship between the BlockedUsers and Users models
     blocker = db.relationship("Users", foreign_keys=[blocker_id])

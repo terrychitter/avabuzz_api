@@ -55,7 +55,8 @@ def generate_unique_private_id(session: scoped_session) -> str:
 
 def generate_uuid() -> str:
     """
-    Generates a UUID. Example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    Generates a UUID.
+    Example: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
 
     Returns:
         str: A UUID.

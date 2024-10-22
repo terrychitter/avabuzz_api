@@ -32,5 +32,4 @@ def get_comments_for_post(post_id: int) -> Tuple[Response, int]:
 
         return jsonify([comment.to_dict() for comment in comments]), 200
     except Exception as e:
-        print(e)
         return jsonify({"error": str(e)}), 500

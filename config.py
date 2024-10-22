@@ -11,7 +11,6 @@ class Config:
 
     # API KEY
     API_KEY:str = os.getenv("API_KEY", "your_default_api_key")
-    print(API_KEY)
 
     # Flask-SQLAlchemy configuration
     SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_URI", "sqlite:///default.db")
