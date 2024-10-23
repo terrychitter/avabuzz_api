@@ -1,6 +1,8 @@
+# TODO: Add validation for user groups class
 from enum import Enum
 from app import db
 from datetime import datetime
+from sqlalchemy.orm import validates
 
 class UserGroups(db.Model): # type: ignore
     """Represents a record of user-created groups within the system.

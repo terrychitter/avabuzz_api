@@ -5,5 +5,4 @@ from app.models.user.user_groups import UserGroups
 from app.models.user.blocked_users import BlockedUsers
 from app.models.user.user_profile_accessories import UserProfileAccessories
 from app.models.user.owned_accessories import OwnedAccessories
-from app.models.user.user_private_ids import UserPrivateId
 from app.models.user.user_public_ids import UserPublicId

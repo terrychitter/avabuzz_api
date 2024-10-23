@@ -1,7 +1,25 @@
 from enum import Enum
 from app import db
 from datetime import datetime
+from sqlalchemy.orm import validates
+from app.models.user.users import valid_private_user_id
+from app.utils.validation import valid_uuid, valid_datetime
 from app.utils.id_generation import generate_uuid
+from app.types.length import (
+    USER_PRIVATE_ID_LENGTH,
+    FOLLOWER_ID_LENGTH
+)
+
+def valid_follow_id(value: str) -> bool:
+    """Validates a follow identifier based on the UUID format.
+
+    Args:
+        value (str): The follow identifier to be validated.
+
+    Returns:
+        bool: True if the follow identifier is valid, False otherwise.
+    """
+    return valid_uuid(value)
 
 class UserFollowers(db.Model): # type: ignore
     """Represents a record of user follow relationships within the system.
@@ -29,15 +47,45 @@ class UserFollowers(db.Model): # type: ignore
     __tablename__: str = "user_followers"
 
     # COLUMNS
-    follow_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    follower_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    followee_user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    follow_id: str = db.Column(db.String(FOLLOWER_ID_LENGTH), primary_key=True, default=generate_uuid)
+    follower_user_id: str = db.Column(db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=False)
+    followee_user_id: str = db.Column(db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=False)
     followed_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # RELATIONSHIPS
     follower = db.relationship("Users", foreign_keys=[follower_user_id])
     followee = db.relationship("Users", foreign_keys=[followee_user_id])
 
+    #region VALIDATION
+    # FOLLOW ID
+    @validates("follow_id")
+    def validate_follow_id(self, key, follow_id: str) -> str:
+        if not valid_follow_id(follow_id):
+            raise ValueError("Invalid follow identifier")
+        return follow_id
+        
+    # FOLLOWER USER ID
+    @validates("follower_user_id")
+    def validate_follower_user_id(self, key, follower_user_id: str) -> str:
+        if not valid_private_user_id(follower_user_id):
+            raise ValueError("Invalid follower user identifier")
+        return follower_user_id
+    
+    # FOLLOWEE USER ID
+    @validates("followee_user_id")
+    def validate_followee_user_id(self, key, followee_user_id: str) -> str:
+        if not valid_private_user_id(followee_user_id):
+            raise ValueError("Invalid followee user identifier")
+        return followee_user_id
+    
+    # FOLLOWED AT
+    @validates("followed_at")
+    def validate_followed_at(self, key, followed_at: datetime) -> datetime:
+        if not valid_datetime(followed_at):
+            raise ValueError("Invalid followed at timestamp")
+        return followed_at
+    #endregion VALIDATION
+    
     # METHODS
     def __repr__(self):
         return f"<UserFollowers {self.id}>"

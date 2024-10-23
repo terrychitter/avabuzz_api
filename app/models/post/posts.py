@@ -6,7 +6,7 @@ from app.types.enum import PostType
 from sqlalchemy.orm import validates
 from app.utils.validation import valid_uuid, valid_enum_element, valid_datetime, valid_integer
 from app.models.post.post_categories import valid_post_category_id
-from app.models.user.users import valid_user_id
+from app.models.user.users import valid_private_user_id
 from app.utils.id_generation import generate_uuid
 from sqlalchemy import DateTime, Enum as SQLAlchemyEnum, Integer, String, Text
 from app.types.length import (
@@ -124,7 +124,7 @@ class Posts(db.Model): # type: ignore
     # USER_ID
     @validates("user_id")
     def validate_user_id(self, key, user_id: str) -> str:
-        if not valid_user_id(user_id):
+        if not valid_private_user_id(user_id):
             raise ValueError("Invalid user ID.")
         return user_id
     

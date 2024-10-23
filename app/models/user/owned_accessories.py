@@ -1,8 +1,28 @@
 from enum import Enum
 from app import db
 from datetime import datetime
+from sqlalchemy.orm import validates
 from app.utils.id_generation import generate_uuid
+from app.utils.validation import valid_uuid, valid_datetime
+from app.models.market.profile_accessories import valid_accessory_id
+from app.models.user.users import valid_private_user_id
+from app.types.length import (
+    USER_PRIVATE_ID_LENGTH,
+    ACCESSORY_ID_LENGTH,
+    OWNED_ACCESSORY_ID_LENGTH
+)
 
+
+def valid_owned_accessory_id(value: str) -> bool:
+    """Validates an owned accessory identifier based on the UUID format.
+
+    Args:
+        value (str): The owned accessory identifier to be validated.
+
+    Returns:
+        bool: True if the owned accessory identifier is valid, False otherwise.
+    """
+    return valid_uuid(value)
 class OwnedAccessories(db.Model): # type: ignore
     """Represents a record of accessories owned by users.
 
@@ -36,13 +56,13 @@ class OwnedAccessories(db.Model): # type: ignore
     __tablename__: str = "owned_accessories"
 
     # COLUMNS
-    owned_accessory_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    owned_accessory_id: str = db.Column(db.String(OWNED_ACCESSORY_ID_LENGTH), primary_key=True, default=generate_uuid)
     user_id: str = db.Column(
-        db.String(10), db.ForeignKey("users.private_user_id"), nullable=True
+        db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=True
     )
     created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
     accessory_id: str = db.Column(
-        db.String(36), db.ForeignKey("profile_accessories.accessory_id"), nullable=False
+        db.String(ACCESSORY_ID_LENGTH), db.ForeignKey("profile_accessories.accessory_id"), nullable=False
     )
 
     # Define relationship to ProfileAccessories model
@@ -66,6 +86,35 @@ class OwnedAccessories(db.Model): # type: ignore
         foreign_keys="[UserProfileAccessories.active_badge_id]",
         back_populates="active_badge",
     )
+
+    #region VALIDATION
+    # OWNED_ACCESSORY_ID
+    @validates("owned_accessory_id")
+    def validate_owned_accessory_id(self, key: str, owned_accessory_id: str) -> str:
+        if not valid_owned_accessory_id(owned_accessory_id):
+            raise ValueError("Invalid owned accessory identifier.")
+        return owned_accessory_id
+    
+    # USER_ID
+    @validates("user_id")
+    def validate_user_id(self, key: str, user_id: str) -> str:
+        if not valid_private_user_id(user_id):
+            raise ValueError("Invalid user identifier.")
+        return user_id
+    
+    # CREATED_AT
+    @validates("created_at")
+    def validate_created_at(self, key: str, created_at: datetime) -> datetime:
+        if not valid_datetime(created_at):
+            raise ValueError("Invalid created at timestamp.")
+        return created_at
+    
+    # ACCESSORY_ID
+    @validates("accessory_id")
+    def validate_accessory_id(self, key: str, accessory_id: str) -> str:
+        if not valid_accessory_id(accessory_id):
+            raise ValueError("Invalid accessory identifier.")
+        return accessory_id
 
     # METHODS
     def __repr__(self):

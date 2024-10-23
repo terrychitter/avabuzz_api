@@ -55,7 +55,16 @@ class OwnershipType(Enum):
 #endregion ------------------- PROFILE ACCESSORIES ------------------- #
 
 
-# region ------------------- POSTS ------------------- #
+#region ---------------------- USERS --------------------------------- #
+class UserType(Enum):
+    user = "USER"
+    admin = "ADMIN"
+    moderator = "MODERATOR"
+
+#endregion ------------------- USERS --------------------------------- #
+
+
+#region ---------------------- POSTS ----------------------------------- #
 class PostType(Enum):
     """Enumeration of post types for the Posts model.
 
@@ -75,9 +84,9 @@ class PostType(Enum):
     IMAGE = "IMAGE"
     VIDEO = "VIDEO"
     EVENT = "EVENT"
-#endregion ------------------- POSTS ------------------- #
+#endregion ------------------- POSTS --------------------------------- #
 
-#region ------------------- POST COMMENTS ------------------- #
+#region ---------------------- POST COMMENTS ------------------------- #
 class CommentStatus(Enum):
     """Enumeration of comment statuses for the PostComments model.
 
@@ -95,4 +104,4 @@ class CommentStatus(Enum):
     NORMAL = "NORMAL"
     HIDDEN = "HIDDEN"
     FLAGGED = "FLAGGED"
-#endregion ------------------- POST COMMENTS ------------------- #
+#endregion ------------------ POST COMMENTS ------------------------- #

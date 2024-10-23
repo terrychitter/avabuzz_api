@@ -7,7 +7,7 @@ from sqlalchemy.orm import validates
 from sqlalchemy import DateTime, String
 from app.utils.id_generation import generate_uuid
 from app.models.post.post_comments import valid_post_comment_id
-from app.models.user.users import valid_user_id
+from app.models.user.users import valid_private_user_id
 from app.utils.validation import valid_datetime, valid_uuid
 from app.types.length import (
     POST_COMMENT_LIKE_ID_LENGTH,
@@ -79,7 +79,7 @@ class PostCommentLikes(db.Model): # type: ignore
     # USER_ID
     @validates("user_id")
     def validate_user_id(self, key, user_id: str) -> str:
-        if not valid_user_id(user_id):
+        if not valid_private_user_id(user_id):
             raise ValueError("Invalid user ID.")
         return user_id
     

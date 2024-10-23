@@ -1,5 +1,11 @@
 from enum import Enum
 from app import db
+from sqlalchemy.orm import validates
+from app.utils.validation import valid_integer
+from app.models.user.users import valid_private_user_id
+from app.types.length import (
+    USER_PRIVATE_ID_LENGTH
+)
 
 class UserStats(db.Model): # type: ignore
     """Represents the statistics of a user account.
@@ -20,7 +26,7 @@ class UserStats(db.Model): # type: ignore
     __tablename__: str = "user_stats"
 
     # COLUMNS
-    user_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True)
+    user_id: str = db.Column(db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), primary_key=True)
     follower_count: int = db.Column(db.Integer, nullable=False)
     following_count: int = db.Column(db.Integer, nullable=False)
     post_count: int = db.Column(db.Integer, nullable=False)
@@ -28,9 +34,39 @@ class UserStats(db.Model): # type: ignore
     # Define relationship to Users model
     user = db.relationship("Users", back_populates="stats")
 
+    #region VALIDATION
+    # USER ID
+    @validates("user_id")
+    def validate_user_id(self, key, user_id: str) -> str:
+        if not valid_private_user_id(user_id):
+            raise ValueError("Invalid user identifier.")
+        return user_id
+    
+    # FOLLOWER COUNT
+    @validates("follower_count")
+    def validate_follower_count(self, key, follower_count: int) -> int:
+        if not valid_integer(follower_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid follower count.")
+        return follower_count
+    
+    # FOLLOWING COUNT
+    @validates("following_count")
+    def validate_following_count(self, key, following_count: int) -> int:
+        if not valid_integer(following_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid following count.")
+        return following_count
+    
+    # POST COUNT
+    @validates("post_count")
+    def validate_post_count(self, key, post_count: int) -> int:
+        if not valid_integer(post_count, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid post count.")
+        return post_count
+    #endregion VALIDATION
+
     # METHODS
     def __repr__(self):
-        return f"<UserStats {self.user_id}>"
+        return f"<USERSTATS {self.user_id}>"
     
     class DictKeys(Enum):
         """Defines keys for the dictionary representation of the UserStats model."""

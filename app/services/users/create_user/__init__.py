@@ -3,11 +3,10 @@ from typing import Tuple, List
 from app import db
 from flask import Response, jsonify, request
 from werkzeug.security import generate_password_hash
-from app.utils.id_generation import generate_unique_public_id, generate_unique_private_id
+from app.utils.id_generation import generate_unique_public_id
 from app.models import (Users,
                         UserStats,
                         UserPublicId,
-                        UserPrivateId,
                         ProfileAccessories,
                         UserProfileAccessories,
                         OwnedAccessories)
@@ -115,30 +114,26 @@ def create_user(user_data: dict) -> Tuple[Response, int]:
     
     # Generate unique IDs for the new user
     public_id = generate_unique_public_id(db.session)
-    private_id = generate_unique_private_id(db.session)
 
     # Create instances for storing public and private IDs
     user_public_id = UserPublicId(public_id=public_id)
-    user_private_id = UserPrivateId(private_id=private_id)
 
     # Create a new user instance with the provided data
     new_user = Users(
         public_user_id=public_id,
-        private_user_id=private_id,
         username=user_data["username"],
         email=user_data["email"],
         password_hash=generate_password_hash(user_data["password"]),
     )
 
     # Add user stats
-    user_stats = UserStats(user_id=private_id, follower_count=0, following_count=0, post_count=0)
+    user_stats = UserStats(user_id=new_user.private_user_id, follower_count=0, following_count=0, post_count=0)
 
     try:
         # Add the new user and ID records to the database and commit the transaction
         db.session.add(new_user)
         db.session.add(user_stats)
         db.session.add(user_public_id)
-        db.session.add(user_private_id)
         db.session.commit()
 
         # Fetch default accessories

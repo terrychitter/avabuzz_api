@@ -4,7 +4,7 @@ from enum import Enum
 from datetime import datetime
 from app.types.enum import CommentStatus
 from app.utils.id_generation import generate_uuid
-from app.models.user.users import valid_user_id
+from app.models.user.users import valid_private_user_id
 from sqlalchemy import DateTime, Enum as SQLAlchemyEnum, String, Text
 from sqlalchemy.orm import validates
 from app.utils.validation import valid_uuid, valid_post_id, valid_enum_element, valid_datetime, valid_text
@@ -96,7 +96,7 @@ class PostComments(db.Model): # type: ignore
     # USER_ID
     @validates("user_id")
     def validate_user_id(self, key, user_id: str) -> str:
-        if not valid_user_id(user_id):
+        if not valid_private_user_id(user_id):
             raise ValueError("Invalid user ID")
         return user_id
     

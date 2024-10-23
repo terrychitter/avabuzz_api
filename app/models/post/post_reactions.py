@@ -4,7 +4,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import validates
 from app.models.post.posts import valid_post_id
 from app.models.post.post_reaction_types import valid_post_reaction_type
-from app.models.user.users import valid_user_id
+from app.models.user.users import valid_private_user_id
 from app.types.length import (
     POST_ID_LENGTH,
     USER_PRIVATE_ID_LENGTH,
@@ -56,7 +56,7 @@ class PostReactions(db.Model): # type: ignore
     # USER_ID
     @validates("user_id")
     def validate_user_id(self, key, user_id: str) -> str:
-        if not valid_user_id(user_id):
+        if not valid_private_user_id(user_id):
             raise ValueError("Invalid user ID.")
         return user_id
     

@@ -59,7 +59,7 @@ def validate_required_fields(data: dict, required_fields: List[Dict[str, Any]]) 
     return jsonify({"message": "Validation passed"}), 200
 
 # ----------------- VALIDATE EMAIL ----------------- #
-def valid_email(email: str) -> bool:
+def valid_email(email: Optional[str]) -> bool:
     """
     Validates an email address based on a simple regex pattern.
 
@@ -69,25 +69,10 @@ def valid_email(email: str) -> bool:
     Returns:
         bool: True if the email is valid, False otherwise.
     """
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-    
-    return re.fullmatch(regex, email) is not None
-
-# ----------------- VALIDATE FRIEND CODE ----------------- #
-def valid_friend_code(friend_code: str) -> bool:
-    """
-    Validates a friend code based on a simple regex pattern.
-    Valid Friend Code Format: **XXX-XXX**, where X is a digit or letter.
-
-    Args:
-        friend_code (str): The friend code to be validated.
-    
-    Returns:
-        bool: True if the friend code is valid, False otherwise.
-    """
-    regex = r'\b[A-Za-z0-9]{2,3}-[A-Za-z0-9]{3}\b'
-    
-    return re.fullmatch(regex, friend_code) is not None
+    if email is None:
+        return False
+    r = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    return re.fullmatch(r, email) is not None
 
 # ----------------- VALIDATE POST ID ----------------- #
 def valid_post_id(value: Optional[str]) -> bool:
@@ -226,16 +211,3 @@ def valid_boolean(value: Any) -> bool:
         bool: True if the value is a boolean, False otherwise.
     """
     return isinstance(value, bool)
-
-# ----------------- VALIDATE POST CATEGORY ID ----------------- #
-def valid_post_category_id(value: Optional[str]) -> bool:
-    """
-    Validates a post category identifier based on the UUID format.
-
-    Args:
-        value (str): The post category identifier to be validated.
-
-    Returns:
-        bool: True if the post category identifier is valid, False otherwise.
-    """
-    return valid_uuid(value)

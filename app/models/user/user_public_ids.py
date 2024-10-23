@@ -1,5 +1,10 @@
 from enum import Enum
+from sqlalchemy.orm import validates
 from app import db
+from app.models.user.users import valid_public_user_id
+from app.types.length import (
+    USER_PUBLIC_ID_LENGTH
+)
 
 
 class UserPublicId(db.Model): # type: ignore
@@ -20,7 +25,16 @@ class UserPublicId(db.Model): # type: ignore
     __tablename__: str = "user_public_ids"
 
     # COLUMNS
-    public_id: str = db.Column(db.String(10), primary_key=True)
+    public_id: str = db.Column(db.String(USER_PUBLIC_ID_LENGTH), primary_key=True)
+
+    #region VALIDATION
+    # PUBLIC ID
+    @validates("public_id")
+    def validate_public_id(self, key, public_id: str) -> str:
+        if not valid_public_user_id(public_id):
+            raise ValueError("Invalid user public identifier.")
+        return public_id
+    #endregion VALIDATION
 
     # METHODS
     def __repr__(self):

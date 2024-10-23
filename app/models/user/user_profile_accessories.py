@@ -1,5 +1,12 @@
 from enum import Enum
 from app import db
+from sqlalchemy.orm import validates
+from app.models.user.users import valid_private_user_id
+from app.models.user.owned_accessories import valid_owned_accessory_id
+from app.types.length import (
+    USER_PRIVATE_ID_LENGTH,
+    OWNED_ACCESSORY_ID_LENGTH
+)
 
 class UserProfileAccessories(db.Model): # type: ignore
     """Represents the active profile accessories for a user account.
@@ -29,20 +36,20 @@ class UserProfileAccessories(db.Model): # type: ignore
 
     # COLUMNS
     user_id: str = db.Column(
-        db.String(10), db.ForeignKey("users.private_user_id"), primary_key=True
+        db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), primary_key=True
     )
     active_banner_id: str = db.Column(
-        db.String(36),
+        db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
     active_profile_picture_border_id: str = db.Column(
-        db.String(36),
+        db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
     active_badge_id: str = db.Column(
-        db.String(36),
+        db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
         nullable=False,
     )
@@ -66,6 +73,36 @@ class UserProfileAccessories(db.Model): # type: ignore
         foreign_keys=[active_badge_id],
         back_populates="user_profile_accessories_badge",
     )
+
+    #region VALIDATION
+    # USER_ID
+    @validates("user_id")
+    def validate_user_id(self, key: str, user_id: str) -> str:
+        if not valid_private_user_id(user_id):
+            raise ValueError("Invalid user identifier.")
+        return user_id
+    
+    # ACTIVE_BANNER_ID
+    @validates("active_banner_id")
+    def validate_active_banner_id(self, key: str, active_banner_id: str) -> str:
+        if not valid_owned_accessory_id(active_banner_id):
+            raise ValueError("Invalid active banner identifier.")
+        return active_banner_id
+    
+    # ACTIVE_PROFILE_PICTURE_BORDER_ID
+    @validates("active_profile_picture_border_id")
+    def validate_active_profile_picture_border_id(self, key: str, active_profile_picture_border_id: str) -> str:
+        if not valid_owned_accessory_id(active_profile_picture_border_id):
+            raise ValueError("Invalid active profile picture border identifier.")
+        return active_profile_picture_border_id
+    
+    # ACTIVE_BADGE_ID
+    @validates("active_badge_id")
+    def validate_active_badge_id(self, key: str, active_badge_id: str) -> str:
+        if not valid_owned_accessory_id(active_badge_id):
+            raise ValueError("Invalid active badge identifier.")
+        return active_badge_id
+    #endregion VALIDATION
 
     # METHODS
     def __repr__(self):

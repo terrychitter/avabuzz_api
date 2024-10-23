@@ -28,30 +28,6 @@ def generate_unique_public_id(session: scoped_session) -> str:
         
         if not existing_id:
             return random_id
-        
-def generate_unique_private_id(session: scoped_session) -> str:
-    """
-    Generates a unique private ID for a user. It will check if the generated private ID already exists in the database.
-    NOTE: This will not add the generated private ID to the database. This is the responsibility of the caller.
-
-    Args:
-        session (Session): SQLAlchemy session to use for querying the database.
-
-    Returns:
-        str: A unique private ID.
-    """
-    from app.models import UserPrivateId
-    letters = string.ascii_uppercase
-    numbers = string.digits
-    
-    while True:
-        random_id: str = ''.join(random.choice(letters + numbers) for _ in range(10))
-        
-        # Check if the generated ID already exists in the database
-        existing_id: Optional[UserPrivateId] = session.query(UserPrivateId).filter_by(private_id=random_id).first()
-        
-        if not existing_id:
-            return random_id
 
 def generate_uuid() -> str:
     """

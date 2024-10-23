@@ -1,7 +1,25 @@
 from enum import Enum
 from app import db
 from datetime import datetime
+from sqlalchemy.orm import validates
 from app.utils.id_generation import generate_uuid
+from app.utils.validation import valid_uuid, valid_datetime
+from app.models.user.users import valid_private_user_id
+from app.types.length import (
+    BLOCKED_USERS_ID_LENGTH,
+    USER_PRIVATE_ID_LENGTH
+)
+
+def valid_blocked_users_id(value: str) -> bool:
+    """Validates a blocked user identifier based on the UUID format.
+
+    Args:
+        value (str): The blocked user identifier to be validated.
+
+    Returns:
+        bool: True if the blocked user identifier is valid, False otherwise.
+    """
+    return valid_uuid(value)
 
 class BlockedUsers(db.Model): # type: ignore
     """Represents a record of users who have blocked each other in the system.
@@ -30,14 +48,44 @@ class BlockedUsers(db.Model): # type: ignore
     __tablename__: str = "blocked_users"
 
     # COLUMNS
-    blocked_users_id: str = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    blocker_id: str = db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
-    blocked_id: str= db.Column(db.String(10), db.ForeignKey("users.private_user_id"), nullable=False)
+    blocked_users_id: str = db.Column(db.String(BLOCKED_USERS_ID_LENGTH), primary_key=True, default=generate_uuid)
+    blocker_id: str = db.Column(db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=False)
+    blocked_id: str= db.Column(db.String(USER_PRIVATE_ID_LENGTH), db.ForeignKey("users.private_user_id"), nullable=False)
     blocked_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # Define the relationship between the BlockedUsers and Users models
     blocker = db.relationship("Users", foreign_keys=[blocker_id])
     blocked = db.relationship("Users", foreign_keys=[blocked_id])
+
+    #region VALIDATION
+    # BLOCKED_USERS_ID
+    @validates("blocked_users_id")
+    def validate_blocked_users_id(self, key: str, blocked_users_id: str) -> str:
+        if not valid_blocked_users_id(blocked_users_id):
+            raise ValueError("Invalid blocked users identifier.")
+        return blocked_users_id
+    
+    # BLOCKER_ID
+    @validates("blocker_id")
+    def validate_blocker_id(self, key: str, blocker_id: str) -> str:
+        if not valid_private_user_id(blocker_id):
+            raise ValueError("Invalid blocker identifier.")
+        return blocker_id
+    
+    # BLOCKED_ID
+    @validates("blocked_id")
+    def validate_blocked_id(self, key: str, blocked_id: str) -> str:
+        if not valid_private_user_id(blocked_id):
+            raise ValueError("Invalid blocked identifier.")
+        return blocked_id
+    
+    # BLOCKED_AT
+    @validates("blocked_at")
+    def validate_blocked_at(self, key: str, blocked_at: datetime) -> datetime:
+        if not valid_datetime(blocked_at):
+            raise ValueError("Invalid blocked at timestamp.")
+        return blocked_at
+    #endregion VALIDATION
 
     # METHODS
     def __repr__(self):
