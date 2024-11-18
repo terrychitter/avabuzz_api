@@ -48,8 +48,9 @@ def login(login_data: Dict[str, str]) -> Tuple[Response, int]:
             return jsonify({"message": "Incorrect email or password."}), 401 
         
         # Generate a JWT token
-        access_token = create_access_token(identity=user.private_user_id)
-        refresh_token = create_refresh_token(identity=user.private_user_id)
+        additional_claims = {"role": user.user_type.value}
+        access_token = create_access_token(identity=user.private_user_id, additional_claims=additional_claims)
+        refresh_token = create_refresh_token(identity=user.private_user_id, additional_claims=additional_claims)
 
         return jsonify(
             {"access_token": access_token,

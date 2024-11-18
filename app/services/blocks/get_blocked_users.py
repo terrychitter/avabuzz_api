@@ -1,8 +1,9 @@
 from typing import Tuple
 from flask import Response, jsonify
 from app.models import Users, BlockedUsers
+from app.utils.io import record_exists, paginate_query
 
-def get_blocked_users(private_user_id: str) -> Tuple[Response, int]:
+def get_blocked_users(page: int, per_page: int, private_user_id: str) -> Tuple[Response, int]:
     """
     Get the list of users blocked by the user.
 
@@ -22,15 +23,22 @@ def get_blocked_users(private_user_id: str) -> Tuple[Response, int]:
     """
     try:
         # Check if the user exists
-        user = Users.query.filter_by(private_user_id=private_user_id).first()
-        if not user:
-            return jsonify({"message": "User not found."}), 404
+        if not record_exists(Users, private_user_id=private_user_id):
+            return jsonify({"message": "User not found"}), 404
         
         # Get the list of blocked users
-        blocked_users = BlockedUsers.query.filter_by(blocker_id=private_user_id).all()
+        blocked_users = BlockedUsers.query.filter_by(blocker_id=private_user_id).order_by(BlockedUsers.blocked_at.desc()) #type: ignore
+
+        # Paginate the list of blocked users
+        data = paginate_query(
+            query=blocked_users,
+            per_page=per_page,
+            page=page,
+            items_name="blocked_users"
+        )
 
         # Return the list of blocked users
-        return jsonify([blocked_user.to_dict() for blocked_user in blocked_users]), 200
+        return jsonify(data), 200
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500

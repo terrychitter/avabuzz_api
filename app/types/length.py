@@ -1,5 +1,11 @@
 from enum import Enum
 
+# PAGANATION
+PAGE: int = 1
+PER_PAGE: int = 20
+PER_PAGE_LIMIT: int = 100
+PAGE_LIMIT: int = 10 ** 6
+
 # POST MEDIA
 POST_MEDIA_ID_LENGTH: int = 36
 MEDIA_URL_LENGTH: int = 255

@@ -16,10 +16,10 @@ class ProfileAccessoryType(Enum):
     Returns:
         None
     """
-    USER_BANNER = "USER-BANNER"
-    PROFILE_PICTURE_BORDER = "PROFILE-PICTURE-BORDER"
+    USER_BANNER = "USER_BANNER"
+    PROFILE_PICTURE_BORDER = "PROFILE-PICTURE_BORDER"
     BADGE = "BADGE"
-    GROUP_BANNER = "GROUP-BANNER"
+    GROUP_BANNER = "GROUP_BANNER"
 
 class ProfileType(Enum):
     """Defines the types of profiles available.
@@ -34,8 +34,8 @@ class ProfileType(Enum):
     Returns:
         None
     """
-    USER_PROFILE = "USER-PROFILE"
-    GROUP_PROFILE = "GROUP-PROFILE"
+    USER_PROFILE = "USER_PROFILE"
+    GROUP_PROFILE = "GROUP_PROFILE"
 
 class OwnershipType(Enum):
     """Defines the types of ownership available.
@@ -57,10 +57,22 @@ class OwnershipType(Enum):
 
 #region ---------------------- USERS --------------------------------- #
 class UserType(Enum):
-    user = "USER"
-    admin = "ADMIN"
-    moderator = "MODERATOR"
+    """Enumeration of user types for the Users model.
 
+    This enumeration defines the different types of users that can be created
+    in the system, including regular users, administrators, and moderators.
+
+    Attributes:
+        USER (str): A regular user with limited permissions.
+        ADMIN (str): An administrator with full permissions.
+        MODERATOR (str): A moderator with limited permissions.
+
+    Returns:
+        None
+    """
+    USER = "USER"
+    ADMIN = "ADMIN"
+    MODERATOR = "MODERATOR"
 #endregion ------------------- USERS --------------------------------- #
 
 

@@ -1,9 +1,9 @@
 from typing import Tuple
 from flask import Response
+from app.utils.io import get_pagination_params
 from app.services.blocks.get_blocked_users import get_blocked_users
 from app.services.blocks.block_user import block_user
 from app.services.blocks.unblock_user import unblock_user
-
 
 # ----------------- GET BLOCKED USERS ----------------- #
 def get_blocked_users_service(private_user_id: str) -> Tuple[Response, int]:
@@ -24,7 +24,8 @@ def get_blocked_users_service(private_user_id: str) -> Tuple[Response, int]:
             - If the user is not found, returns a JSON response with an error message and a 404 status code.
             - If an error occurs during the process, returns a JSON response with an error message and a 500 status code.
     """
-    return get_blocked_users(private_user_id)
+    page, per_page = get_pagination_params()
+    return get_blocked_users(page=page, per_page=per_page, private_user_id=private_user_id)
 
 # ----------------- BLOCK USER ----------------- #
 def block_user_service(blocker_id: str, blocked_id: str) -> Tuple[Response, int]:

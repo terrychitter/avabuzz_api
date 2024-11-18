@@ -14,7 +14,6 @@ def get_blocked_users():
     private_user_id = get_jwt_identity()
     return get_blocked_users_service(private_user_id)
 
-
 # ----------------- BLOCK USER ----------------- #
 @bp.route("/blocks/<string:blocked_id>", methods=["POST"])
 @api_key_required

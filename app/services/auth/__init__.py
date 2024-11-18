@@ -3,6 +3,8 @@ from typing import Tuple
 from config import Config
 from functools import wraps
 from app.services.jwt import jwt
+from app.types.enum import UserType
+from flask_jwt_extended import get_jwt
 from app.services.auth.login import login
 from app.services.auth.logout import logout
 from flask import Response, request, jsonify
@@ -49,6 +51,27 @@ def api_key_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+# ----------------- ADMIN REQUIRED ----------------- #
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        role = get_jwt().get("role")
+        if role != UserType.ADMIN.value:
+            return jsonify({"message": f"You do not have permission to access this resource."}), 403    
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ----------------- MODERATOR REQUIRED ----------------- #
+def moderator_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        role = get_jwt().get("role")
+        if role != UserType.MODERATOR.value and role != UserType.ADMIN.value:
+            return jsonify({"message": f"You do not have permission to access this resource. Role {role}"}), 403    
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # ----------------- LOGIN USER ----------------- #
 def login_service(login_data: dict) -> Tuple[Response, int]:

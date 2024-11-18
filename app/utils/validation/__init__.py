@@ -48,15 +48,16 @@ def validate_required_fields(data: dict, required_fields: List[Dict[str, Any]]) 
 
         if exclusive:
             # Check if only one of the exclusive fields is present
-            present_fields = [field for field in fields if field in data and data[field]]
+            present_fields = [field for field in fields if field in data]
             if len(present_fields) != 1:
-                return jsonify({"message": condition["message"]}), 400
+                return jsonify({"error": condition["message"]}), 400
         else:
             # Check if at least one of the fields is present
-            if not any(field in data and data[field] for field in fields):
-                return jsonify({"message": condition["message"]}), 400
+            if not any(field in data for field in fields):
+                return jsonify({"error": condition["message"]}), 400
 
     return jsonify({"message": "Validation passed"}), 200
+
 
 # ----------------- VALIDATE EMAIL ----------------- #
 def valid_email(email: Optional[str]) -> bool:

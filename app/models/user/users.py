@@ -147,7 +147,7 @@ class Users(db.Model): # type: ignore
     country: str = db.Column(db.String(USER_COUNTRY_LENGTH), nullable=True, default=None)
     orientation: str = db.Column(db.String(USER_ORIENTATION_LENGTH), nullable=True, default=None)
     biography: str = db.Column(db.Text, nullable=True)
-    user_type: UserType = db.Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.user)
+    user_type: UserType = db.Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.USER)
     birthdate: date = db.Column(db.Date, nullable=True, default=None)
     created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
@@ -283,6 +283,18 @@ class Users(db.Model): # type: ignore
             raise ValueError("Invalid created at datetime.")
         return created_at
     #endregion VALIDATION
+
+    #region AUX
+    def is_admin(self) -> bool:
+        """Determines if the user is an administrator.
+
+        This method checks if the user is an administrator based on the user type.
+
+        Returns:
+            bool: True if the user is an administrator, False otherwise.
+        """
+        return self.user_type == UserType.ADMIN
+    #endregion AUX
 
     def __repr__(self):
         return f"<User {self.private_user_id}>"

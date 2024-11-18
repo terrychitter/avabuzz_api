@@ -41,7 +41,6 @@ class ProfileAccessories(db.Model): # type: ignore
         profile_type (enum): The type of profile for which the accessory is applicable which cannot be null.
         ownership_type (str): The type of ownership applicable to the accessory (e.g., user, group).
         available (bool): Indicates whether the accessory is currently available for user's to obtain. Defaults to `True`.
-        default_accessory (bool): Indicates whether this accessory is an accessory added by default when a user is created. Defaults to `False`.
         owner_count (int): The count of users who own this accessory. Defaults to `0`.
         created_at (datetime): The timestamp when the accessory was created. Defaults to the current time.
 
@@ -59,12 +58,12 @@ class ProfileAccessories(db.Model): # type: ignore
     accessory_id: str = db.Column(String(ACCESSORY_ID_LENGTH), primary_key=True, default=generate_uuid)
     accessory_name: str = db.Column(String(ACCESSORY_NAME_LENGTH_MAX), nullable=False)
     accessory_description: str = db.Column(Text, nullable=False)
+    bits: int = db.Column(Integer, nullable=False, default=0)
     media_url: str = db.Column(String(MEDIA_URL_LENGTH), nullable=False)
     profile_accessory_type: ProfileAccessoryType = db.Column(SQLAlchemyEnum(ProfileAccessoryType), nullable=False)
     profile_type: ProfileType = db.Column(SQLAlchemyEnum(ProfileType), nullable=False)
     ownership_type: OwnershipType = db.Column(SQLAlchemyEnum(OwnershipType), nullable=False)
     available: bool = db.Column(Boolean, nullable=False, default=True)
-    default_accessory: bool = db.Column(Boolean, nullable=False, default=False)
     owner_count: int = db.Column(Integer, nullable=False, default=0)
     created_at: datetime = db.Column(DateTime, nullable=False, default=datetime.now)
     #endregion
@@ -95,6 +94,13 @@ class ProfileAccessories(db.Model): # type: ignore
         if not valid_text(accessory_description, limit=False, allow_empty=True):
             raise ValueError("Invalid accessory description.")
         return accessory_description
+
+    # BITS
+    @validates("bits")
+    def validate_bits(self, key, bits: int) -> int:
+        if not valid_integer(bits, allow_negative=False, allow_zero=True):
+            raise ValueError("Invalid bits value.")
+        return bits
     
     # MEDIA_URL
     @validates("media_url")
@@ -132,14 +138,6 @@ class ProfileAccessories(db.Model): # type: ignore
         if not valid_boolean(available):
             raise ValueError("Invalid availability status.")
         return available
-
-
-    # DEFAULT_ACCESSORY
-    @validates("default_accessory")
-    def validate_default_accessory(self, key, default_accessory: bool) -> bool:
-        if not valid_boolean(default_accessory):
-            raise ValueError("Invalid default accessory status.")
-        return default_accessory
     
     # OWNER_COUNT
     @validates("owner_count")
@@ -171,7 +169,6 @@ class ProfileAccessories(db.Model): # type: ignore
         PROFILE_TYPE = "profile_type"
         OWNERSHIP_TYPE = "ownership_type"
         AVAILABLE = "available"
-        DEFAULT_ACCESSORY = "default_accessory"
         OWNER_COUNT = "owner_count"
         CREATED_AT = "created_at"
     
@@ -191,12 +188,12 @@ class ProfileAccessories(db.Model): # type: ignore
             "id": self.accessory_id,
             "name": self.accessory_name,
             "description": self.accessory_description,
+            "bits": self.bits,
             "url": self.media_url,
-            "accessory_type": self.profile_accessory_type,
-            "profile_type": self.profile_type,
-            "ownership_type": self.ownership_type,
+            "accessory_type": self.profile_accessory_type.value,
+            "profile_type": self.profile_type.value,
+            "ownership_type": self.ownership_type.value,
             "available": self.available,
-            "default_accessory": self.default_accessory,
             "owner_count": self.owner_count,
             "created_at": self.created_at
         }
