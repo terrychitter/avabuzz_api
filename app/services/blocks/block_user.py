@@ -39,7 +39,11 @@ def block_user(blocker_id: str, blocked_id: str) -> Tuple[Response, int]:
             return jsonify({"message": "User already blocked"}), 400
         
         # Block the user
-        new_blocked_user = BlockedUsers(blocker_id=blocker_id, blocked_id=blocked_user.private_user_id)
+        new_blocked_user = BlockedUsers(
+            blocker_id=blocker_id,
+            blocked_id=blocked_user.private_user_id
+        )
+        
         db.session.add(new_blocked_user)
 
         db.session.commit()

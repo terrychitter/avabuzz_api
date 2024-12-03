@@ -35,7 +35,8 @@ class PostHashTags(db.Model): # type: ignore
     hashtag_id: str = db.Column(String(HASHTAG_ID_LENGTH), db.ForeignKey("hashtags.hashtag_id"), primary_key=True)
 
     # Define relationship to HashTags model
-    hashtag = db.relationship("HashTags", backref="post_hashtag")
+    post = db.relationship("Posts", back_populates="post_hashtags", overlaps="hashtags,post_hashtags")
+    hashtag = db.relationship("HashTags", back_populates="post_hashtag", overlaps="posts")
 
     #region VALIDATION
     # POST_ID

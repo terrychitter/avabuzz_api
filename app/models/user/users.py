@@ -165,11 +165,11 @@ class Users(db.Model): # type: ignore
 
     # Define relationship to UserFollowers model
     followers = db.relationship(
-        "UserFollowers", foreign_keys="[UserFollowers.follower_user_id]", back_populates="followee", cascade="all, delete-orphan", uselist=True
+        "UserFollowers", foreign_keys="[UserFollowers.follower_user_id]", back_populates="followee", overlaps="follower", cascade="all, delete-orphan", uselist=True
     )
 
     following = db.relationship(
-        "UserFollowers", foreign_keys="[UserFollowers.followee_user_id]", back_populates="follower", cascade="all, delete-orphan", uselist=True
+        "UserFollowers", foreign_keys="[UserFollowers.followee_user_id]", back_populates="follower", overlaps="followee", cascade="all, delete-orphan", uselist=True
     )
 
     # Define relationship to PostReactions model
@@ -301,7 +301,7 @@ class Users(db.Model): # type: ignore
     
     class DictKeys(Enum):
         """Defines keys for the dictionary representation of the Users model."""
-        ID = "id"
+        ID = "public_user_id"
         USERNAME = "username"
         EMAIL = "email"
         FRIEND_CODE = "friend_code"
@@ -336,7 +336,7 @@ class Users(db.Model): # type: ignore
         user_stats: Union[UserStats, dict] = self.stats if isinstance(self.stats, UserStats) else {}
 
         data = {
-            "id": self.public_user_id,
+            "public_user_id": self.public_user_id,
             "username": self.username,
             "email": self.email,
             "friend_code": self.friend_code,

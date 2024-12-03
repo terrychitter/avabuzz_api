@@ -53,8 +53,8 @@ class UserFollowers(db.Model): # type: ignore
     followed_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     # RELATIONSHIPS
-    follower = db.relationship("Users", foreign_keys=[follower_user_id])
-    followee = db.relationship("Users", foreign_keys=[followee_user_id])
+    follower = db.relationship("Users", foreign_keys=[follower_user_id], back_populates="followers")
+    followee = db.relationship("Users", foreign_keys=[followee_user_id], back_populates="following")
 
     #region VALIDATION
     # FOLLOW ID

@@ -15,6 +15,7 @@ class Config:
     # Flask-SQLAlchemy configuration
     SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_URI", "sqlite:///default.db")
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+    SQLALCHEMY_ECHO: bool = True
 
     # JWT configuration
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your_default_jwt_secret_key")

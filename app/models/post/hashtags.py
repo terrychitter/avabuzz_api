@@ -90,7 +90,19 @@ class HashTags(db.Model): # type: ignore
     post_count: int = db.Column(Integer, default=0)
 
     # RELATIONSHIPS
-    posts = db.relationship("Posts", secondary="post_hashtags", back_populates="hashtags")
+    posts = db.relationship(
+        "Posts",
+        secondary="post_hashtags",
+        back_populates="hashtags",
+        overlaps="post_hashtag"
+    )
+    post_hashtag = db.relationship(
+        "PostHashTags",
+        back_populates="hashtag",
+        overlaps="posts"
+    )
+
+    #TODO: Fix the search for getting blocked users
 
     #region VALIDATION
     @validates("hashtag_id")

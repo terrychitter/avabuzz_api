@@ -9,3 +9,8 @@ PROFILE_ACCESSORIES_SORTING_MAPPINGS = {
     'created_at': 'created_at',
     'bits': 'bits'
 }
+
+BLOCKED_USERS_SORTING_MAPPINGS = {
+    "username": "blocked.username",
+    'blocked_at': 'blocked_at'
+}

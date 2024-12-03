@@ -2,6 +2,8 @@ from math import ceil
 from flask import request
 from datetime import datetime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import aliased
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from typing import Optional, Tuple, Dict, Any, List, Callable
 from sqlalchemy.orm.query import Query
 from app.types.consts import (
@@ -99,7 +101,6 @@ def get_pagination_params() -> Tuple[int, int]:
     """
     # limit the number of pages to PAGE_LIMIT
     page = min(request.args.get(PAGE_PARAM, PAGE, type=int), PAGE_LIMIT)
-    print(page)
 
     # Limit the number of items per page to PER_PAGE_MAX
     per_page = min(request.args.get(PER_PAGE_PARAM, PER_PAGE, type=int), PER_PAGE_LIMIT)
@@ -152,25 +153,42 @@ def paginate_query(
 def build_sort_conditions(
     model,
     sort_params: Dict[str, str] = {},
-    sort_mapping: Dict[str, str] = {}
+    sort_mapping: Dict[str, str] = {},
 ) -> List:
     """
     Build SQLAlchemy sort conditions based on provided sort parameters and sort mapping.
+    Supports sorting on nested relationships.
 
     :param model: SQLAlchemy model class.
     :param sort_params: Dictionary of sort parameters with field names as keys and sort directions as values.
-    :param sort_mapping: Dictionary mapping sort field names to model column names.
-                         Example: {'name': 'accessory_name'}
+                        Example: {'field_name': 'asc'}
+    :param sort_mapping: Dictionary mapping sort field names to model column names or paths.
+                         Example: {'name': 'relation.column_name'}
     :return: List of SQLAlchemy sort conditions.
     """
     sort_conditions = []
 
+    def get_nested_column(model, path: str):
+        """
+        Recursively resolve nested relationships and return the column.
+        Example: "relation1.relation2.column"
+        """
+        parts = path.split(".")
+        current_model = model
+        for part in parts[:-1]:  # Traverse relationships
+            relationship = getattr(current_model, part, None)
+            if relationship is None:
+                return None  # Invalid path
+            current_model = relationship.property.mapper.class_
+        # Get the final column
+        return getattr(current_model, parts[-1], None)
+
     for field, direction in sort_params.items():
         # Check if the field is in sort_mapping
         if field in sort_mapping:
-            # Get the model column
-            column_name = sort_mapping[field]
-            column = getattr(model, column_name, None)
+            # Get the column path
+            column_path = sort_mapping[field]
+            column = get_nested_column(model, column_path)
 
             if column is None:
                 continue  # Skip if the column does not exist
@@ -180,77 +198,82 @@ def build_sort_conditions(
                 sort_conditions.append(column.asc())
             elif direction == 'desc':
                 sort_conditions.append(column.desc())
+
     return sort_conditions
 
 def build_filter_conditions(
     model,
     filters: Dict[str, Any] = {},
-    filter_mapping: Dict[str, Dict[str, str]] = {}
+    filter_mapping: Dict[str, Dict[str, str]] = {},
 ) -> List:
-    """
-    Build SQLAlchemy filter conditions based on provided filters and filter mapping.
-
-    :param model: SQLAlchemy model class.
-    :param filters: Dictionary of filters with field names as keys.
-    :param filter_mapping: Dictionary mapping filter field names to model column names and filter types.
-                           Example: {'name': {'field': 'accessory_name', 'type': 'like'}}
-    :return: List of SQLAlchemy filter conditions.
-    """
     filter_conditions = []
 
-    for field, value in filters.items():
-        # Check if the field is in filter_mapping
-        if field in filter_mapping:
-            # Get the model column and filter type
-            column_name = filter_mapping[field]['field']
-            filter_type = filter_mapping[field].get('type', 'exact')  # Default to 'exact' if not specified
-            column = getattr(model, column_name, None)
+    def get_nested_column(model, path: str):
+        """
+        Recursively resolve nested relationships and return the column.
+        Example: "relation1.relation2.column"
+        """
+        parts = path.split(".")
+        current_model = model
+        for part in parts[:-1]:  # Traverse relationships
+            relationship = getattr(current_model, part, None)
+            if relationship is None:
+                return None  # Invalid path
+            current_model = relationship.property.mapper.class_
+        # Get the final column
+        return getattr(current_model, parts[-1], None)
 
+    def parse_date(date_str: str) -> datetime:
+        """
+        Parses a date string and raises a ValueError if the format is invalid.
+        """
+        try:
+            return datetime.fromisoformat(date_str)
+        except ValueError:
+            raise ValueError(f"Invalid date format: {date_str}. Expected ISO format (YYYY-MM-DD).")
+
+    # Loop through filters and build conditions
+    for field, value in filters.items():
+        if field in filter_mapping:
+            mapping = filter_mapping[field]
+            column_path = mapping['field']
+            filter_type = mapping.get('type', 'exact')
+
+            # Get the column from the model or its relationships
+            column = get_nested_column(model, column_path)
             if column is None:
                 continue  # Skip if the column does not exist
 
-            # Apply the appropriate filter condition based on the filter type
-            # Filter for 'like' type
+            # Build condition based on filter type
             if filter_type == 'like':
-                filter_conditions.append(column.like(f"%{value}%"))
-
-            # Filter for 'number' type
-            elif filter_type == 'number':
-                if "exact" in value:
-                    filter_conditions.append(column == value['exact'])
-                if "gt" in value:
-                    filter_conditions.append(column > value['gt'])
-                if "gte" in value:
-                    filter_conditions.append(column >= value['gte'])
-                if "lt" in value:
-                    filter_conditions.append(column < value['lt'])
-                if "lte" in value:
-                    filter_conditions.append(column <= value['lte'])
-                if "range" in value:
-                    filter_conditions.append(column.between(value['range'][0], value['range'][1]))
-
-            # Filter for 'date' type
-            elif filter_type == 'date' and isinstance(value, dict):
-                # Handle date filters for 'created_at'
-                if 'exact' in value:
-                    exact_date = datetime.fromisoformat(value['exact']).date()
-                    filter_conditions.append(func.date(column) == exact_date)
-                if 'before' in value:
-                    before_date = datetime.fromisoformat(value['before']).date()
-                    filter_conditions.append(func.date(column) < before_date)
-                if 'before-inc' in value:
-                    before_date = datetime.fromisoformat(value['before-inclusive']).date()
-                    filter_conditions.append(func.date(column) <= before_date)
-                if 'after' in value:
-                    after_date = datetime.fromisoformat(value['after']).date()
-                    filter_conditions.append(func.date(column) > after_date)
-                if 'after-inc' in value:
-                    after_date = datetime.fromisoformat(value['after-inclusive']).date()
-                    filter_conditions.append(func.date(column) >= after_date)
-            else:
-                # Default to exact match for fields with 'exact' type or unspecified type
+                filter_conditions.append(column.ilike(f"%{value}%"))
+            elif filter_type == 'exact':
                 filter_conditions.append(column == value)
+            elif filter_type == 'date':
+                # Handle date-based filtering with operators
+                if isinstance(value, dict):  # Check if multiple operators are specified
+                    for op, date_value in value.items():
+                        if isinstance(date_value, str):
+                            date_value = parse_date(date_value)  # Validate and parse date
+                        if op == "exact":
+                            filter_conditions.append(column == date_value)
+                        elif op == "gt":
+                            filter_conditions.append(column > date_value)
+                        elif op == "gte":
+                            filter_conditions.append(column >= date_value)
+                        elif op == "lt":
+                            filter_conditions.append(column < date_value)
+                        elif op == "lte":
+                            filter_conditions.append(column <= date_value)
+                        else:
+                            raise ValueError(f"Unsupported date operator: {op}")
+                else:
+                    # Default to exact match for non-dict values
+                    date_value = parse_date(value)  # Validate and parse date
+                    filter_conditions.append(column == date_value)
+
     return filter_conditions
+
 
 def build_update_params(
     record,

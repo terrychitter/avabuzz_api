@@ -74,11 +74,17 @@ class Posts(db.Model): # type: ignore
     # Define relationship to PostCategories model
     post_category = db.relationship("PostCategories", back_populates="posts")
 
-    # Define relationship to PostHashTags model with cascade
-    post_hashtags = db.relationship("PostHashTags", backref="post", cascade="all, delete-orphan")
-
-    # Define relationship to Hashtags model
-    hashtags = db.relationship("HashTags", secondary="post_hashtags", back_populates="posts")
+    post_hashtags = db.relationship(
+        "PostHashTags", 
+        back_populates="post", 
+        cascade="all, delete-orphan"
+    )
+    hashtags = db.relationship(
+        "HashTags",
+        secondary="post_hashtags",
+        back_populates="posts",
+        overlaps="post_hashtags"
+    )
 
     # Define relationship to PostMedia model
     media = db.relationship("PostMedia", back_populates="post", cascade="all, delete-orphan")

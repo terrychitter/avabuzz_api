@@ -114,7 +114,7 @@ class BlockedUsers(db.Model): # type: ignore
             "blocked_users_id": self.blocked_users_id,
             "blocker": self.blocker.to_dict(),
             "blocked": self.blocked.to_dict(),
-            "blocked_at": self.blocked_at
+            "blocked_at": self.blocked_at,
         }
     
         for field in exclude_fields:

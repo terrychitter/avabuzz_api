@@ -1,6 +1,6 @@
 from typing import Tuple
 from flask import Response
-from app.utils.io import get_pagination_params
+from app.utils.io import get_pagination_params, get_filter_params, get_sort_params
 from app.services.blocks.get_blocked_users import get_blocked_users
 from app.services.blocks.block_user import block_user
 from app.services.blocks.unblock_user import unblock_user
@@ -25,7 +25,9 @@ def get_blocked_users_service(private_user_id: str) -> Tuple[Response, int]:
             - If an error occurs during the process, returns a JSON response with an error message and a 500 status code.
     """
     page, per_page = get_pagination_params()
-    return get_blocked_users(page=page, per_page=per_page, private_user_id=private_user_id)
+    filter_params = get_filter_params()
+    sort_params = get_sort_params()
+    return get_blocked_users(page=page, per_page=per_page, private_user_id=private_user_id, filters=filter_params, sorting=sort_params)
 
 # ----------------- BLOCK USER ----------------- #
 def block_user_service(blocker_id: str, blocked_id: str) -> Tuple[Response, int]:

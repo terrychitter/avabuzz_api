@@ -12,13 +12,62 @@ from app.models import (Users,
                         UserProfileAccessories,
                         OwnedAccessories)
 
-def add_initial_owned_accessories(user_id: str, accessories: List[ProfileAccessories]) -> None:
-    for accessory in accessories:
-        owned_accessory = OwnedAccessories(
-            user_id=user_id,
-            accessory_id=accessory.accessory_id,
+def create_active_profile_accessories_record(user_id: str) -> UserProfileAccessories:
+    """
+    Create a new active profile accessories record for a user.
+
+    This function creates a new record in the `user_profile_accessories` table
+    with the provided user ID.
+
+    Args:
+        user_id (str): The private user ID of the user to create the record for.
+
+    Returns:
+        None
+    """
+    return UserProfileAccessories(
+        user_id=user_id,
+        active_banner_id=None,
+        active_profile_picture_border_id=None,
+        active_badge_id=None
         )
-        db.session.add(owned_accessory)
+
+def create_user_stats_record(user_id: str) -> UserStats:
+    """
+    Create a new user stats record for a user.
+
+    This function creates a new record in the `user_stats` table
+    with the provided user ID.
+
+    Args:
+        user_id (str): The private user ID of the user to create the record for.
+
+    Returns:
+        None
+    """
+    return UserStats(
+        user_id=user_id,
+        follower_count=0,
+        following_count=0,
+        post_count=0
+        )
+
+def create_user_public_id_record(public_id: str) -> UserPublicId:
+    """
+    Create a new user public ID record for a user.
+
+    This function creates a new record in the `user_public_id` table
+    with the provided public ID.
+
+    Args:
+        public_id (str): The public ID to create the record for.
+
+    Returns:
+        None
+    """
+    return UserPublicId(
+        public_id=public_id
+        )
 
 def create_user(user_data: dict) -> Tuple[Response, int]:
     """
@@ -73,7 +122,7 @@ def create_user(user_data: dict) -> Tuple[Response, int]:
         public_id = generate_unique_public_id(db.session)
 
         # Create instances for storing public and private IDs
-        user_public_id = UserPublicId(public_id=public_id)
+        user_public_id = create_user_public_id_record(public_id)
 
         # Create a new user instance with the provided data
         new_user = Users(
@@ -85,12 +134,16 @@ def create_user(user_data: dict) -> Tuple[Response, int]:
         )
 
         # Add user stats
-        user_stats = UserStats(user_id=new_user.private_user_id, follower_count=0, following_count=0, post_count=0)
+        user_stats = create_user_stats_record(new_user.private_user_id)
+
+        # Add user profile accessories record
+        user_profile_accessories = create_active_profile_accessories_record(new_user.private_user_id)
 
         # Add the new user and ID records to the database and commit the transaction
         db.session.add(new_user)
         db.session.add(user_stats)
         db.session.add(user_public_id)
+        db.session.add(user_profile_accessories)
         db.session.commit()
     except Exception as e:
         db.session.rollback()

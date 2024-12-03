@@ -41,17 +41,17 @@ class UserProfileAccessories(db.Model): # type: ignore
     active_banner_id: str = db.Column(
         db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
-        nullable=False,
+        nullable=True,
     )
     active_profile_picture_border_id: str = db.Column(
         db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
-        nullable=False,
+        nullable=True,
     )
     active_badge_id: str = db.Column(
         db.String(OWNED_ACCESSORY_ID_LENGTH),
         db.ForeignKey("owned_accessories.owned_accessory_id"),
-        nullable=False,
+        nullable=True,
     )
 
     # Define relationship to Users model
@@ -85,21 +85,21 @@ class UserProfileAccessories(db.Model): # type: ignore
     # ACTIVE_BANNER_ID
     @validates("active_banner_id")
     def validate_active_banner_id(self, key: str, active_banner_id: str) -> str:
-        if not valid_owned_accessory_id(active_banner_id):
+        if not valid_owned_accessory_id(active_banner_id) and active_banner_id is not None:
             raise ValueError("Invalid active banner identifier.")
         return active_banner_id
     
     # ACTIVE_PROFILE_PICTURE_BORDER_ID
     @validates("active_profile_picture_border_id")
     def validate_active_profile_picture_border_id(self, key: str, active_profile_picture_border_id: str) -> str:
-        if not valid_owned_accessory_id(active_profile_picture_border_id):
+        if not valid_owned_accessory_id(active_profile_picture_border_id) and active_profile_picture_border_id is not None:
             raise ValueError("Invalid active profile picture border identifier.")
         return active_profile_picture_border_id
     
     # ACTIVE_BADGE_ID
     @validates("active_badge_id")
     def validate_active_badge_id(self, key: str, active_badge_id: str) -> str:
-        if not valid_owned_accessory_id(active_badge_id):
+        if not valid_owned_accessory_id(active_badge_id) and active_badge_id is not None:
             raise ValueError("Invalid active badge identifier.")
         return active_badge_id
     #endregion VALIDATION
@@ -129,9 +129,9 @@ class UserProfileAccessories(db.Model): # type: ignore
         """
         data = {
             "user_id": self.user_id,
-            "banner": self.active_banner.to_dict(),
-            "profile_picture_border": self.active_profile_picture_border.to_dict(),
-            "badge": self.active_badge.to_dict()
+            "banner": self.active_banner.to_dict() if self.active_banner else None,
+            "profile_picture_border": self.active_profile_picture_border.to_dict() if self.active_profile_picture_border else None,
+            "badge": self.active_badge.to_dict() if self.active_badge else None
         }
 
         for field in exclude_fields:

@@ -11,3 +11,14 @@ PROFILE_ACCESSORIES_FILTER_MAPPINGS = {
             'owner_count': {'field': 'owner_count', 'type': 'number'},
             'created_at': {'field': 'created_at', 'type': 'date'}
         }
+
+BLOCKED_USERS_FILTER_MAPPINGS = {
+    'username': {
+        'field': 'blocked.username',
+        'type': 'like'
+    },
+    'blocked_at': {
+        'field': 'blocked_at',
+        'type': 'date'
+    }
+}
